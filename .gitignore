@@ -33,3 +33,6 @@ Thumbs.db
 *.contextlint.json
 report.md
 report.json
+
+
+.claude/
