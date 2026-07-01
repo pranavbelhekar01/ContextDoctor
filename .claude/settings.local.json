@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -m pip install -e . -q)",
+      "Bash(python -c \"import contextlint; print\\('version', contextlint.__version__\\)\")"
+    ]
+  }
+}

@@ -1,0 +1,70 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "contextlint"
+version = "0.1.0"
+description = "A static analyzer for RAG systems and context engineering workflows. ESLint for your context."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "ContextLint contributors" }]
+keywords = ["rag", "llm", "context", "chunking", "static-analysis", "linter", "nlp", "retrieval"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Quality Assurance",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+# Zero runtime dependencies: fully local, offline, deterministic.
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/contextlint/contextlint"
+Repository = "https://github.com/contextlint/contextlint"
+Issues = "https://github.com/contextlint/contextlint/issues"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4",
+    "pytest-cov>=4.1",
+    "ruff>=0.5",
+]
+
+[project.scripts]
+contextlint = "contextlint.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["contextlint*"]
+
+[tool.setuptools.package-data]
+contextlint = ["py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["contextlint", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "C4", "SIM", "RUF"]
+ignore = [
+    "E501",   # line length is handled by formatter / long help strings
+    "UP042",  # keep `str, Enum` for broad clarity over StrEnum
+    "RUF001", # ambiguous unicode in strings — intentional terminal glyphs
+    "RUF002", # ambiguous unicode in docstrings — intentional en dashes
+    "RUF003", # ambiguous unicode in comments
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["contextlint"]

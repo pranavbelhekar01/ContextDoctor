@@ -1,0 +1,28 @@
+{
+  "chunks": [
+    {
+      "id": "c0",
+      "text": "Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator. Retrieval-augmented generation combines a retriever with a generator."
+    },
+    {
+      "id": "c1",
+      "text": "The reranking stage reorders candidate passages returned by the first-stage retriever using a cross-encoder model. This improves precision at the top of the ranked list, which matters most for answer quality in a RAG pipeline."
+    },
+    {
+      "id": "c2",
+      "text": "Model comparison for the Orion family:\n\n| Model | Params | Context | Notes |\n| --- | --- | --- | --- |\n| orion-mini | 1.3B | 8k | fast, cheap |\n| orion-base | 7B | 16k | balanced |"
+    },
+    {
+      "id": "c3",
+      "text": "| orion-large | 34B | 32k | best quality |\n| orion-xl | 70B | 128k | research only |\n\nAll models share the same tokenizer."
+    },
+    {
+      "id": "c4",
+      "text": "The reranking stage reorders candidate passages returned by the first-stage retriever using a cross-encoder model. This improves precision at the top of the ranked list, which matters most for answer quality in a RAG pipeline."
+    },
+    {
+      "id": "c5",
+      "text": "See table."
+    }
+  ]
+}
