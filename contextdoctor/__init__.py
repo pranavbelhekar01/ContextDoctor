@@ -7,7 +7,7 @@ invoked. It runs fully offline, with zero API keys and zero cloud dependencies.
 
 from __future__ import annotations
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 from contextdoctor.config import Config
 from contextdoctor.engine import analyze_chunks, analyze_path, analyze_paths

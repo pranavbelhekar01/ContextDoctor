@@ -8,7 +8,7 @@ run publishes to TestPyPI first as a dry-run.
 ## One-time setup
 
 1. **Make the GitHub repo usable by Actions**
-   - The repo is `pranavbelhekar01/ContextLint`. It can stay private, but PyPI
+   - The repo is `pranavbelhekar01/ContextDoctor`. It can stay private, but PyPI
      Trusted Publishing and the public playground/badges need it **public** for
      the full experience. Publishing itself works from a private repo.
    - Create two GitHub **Environments** (Settings → Environments): `pypi` and
@@ -18,7 +18,7 @@ run publishes to TestPyPI first as a dry-run.
    - PyPI → your account → *Publishing* → *Add a pending publisher*:
      - PyPI Project Name: `contextdoctor`
      - Owner: `pranavbelhekar01`
-     - Repository name: `ContextLint`
+     - Repository name: `ContextDoctor`
      - Workflow name: `release.yml`
      - Environment name: `pypi`
    - Repeat on **test.pypi.org** with Environment `testpypi`.
@@ -43,7 +43,7 @@ git push origin v0.1.0
 
 - `pip install contextdoctor` now works — the playground's in-browser install,
   the pre-commit hook, and the GitHub Action all light up.
-- The Action reference `pranavbelhekar01/ContextLint@v0.1` resolves once the tag
+- The Action reference `pranavbelhekar01/ContextDoctor@v0.1` resolves once the tag
   exists (consider also moving a floating `v0.1` tag on each patch).
 - Enable **GitHub Pages** (Settings → Pages → source: GitHub Actions) so
   `pages.yml` deploys the playground.

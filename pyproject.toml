@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "contextdoctor"
-version = "0.1.0"
+version = "0.1.1"
 description = "A static analyzer for RAG systems and context engineering workflows. ESLint for your context."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -26,9 +26,9 @@ classifiers = [
 dependencies = []
 
 [project.urls]
-Homepage = "https://github.com/pranavbelhekar01/ContextLint"
-Repository = "https://github.com/pranavbelhekar01/ContextLint"
-Issues = "https://github.com/pranavbelhekar01/ContextLint/issues"
+Homepage = "https://github.com/pranavbelhekar01/ContextDoctor"
+Repository = "https://github.com/pranavbelhekar01/ContextDoctor"
+Issues = "https://github.com/pranavbelhekar01/ContextDoctor/issues"
 
 [project.optional-dependencies]
 # Optional: parse binary PDFs. The core stays dependency-free without this.

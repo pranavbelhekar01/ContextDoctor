@@ -4,6 +4,15 @@ All notable changes to ContextDoctor are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1] — 2026-07-01
+
+### Changed
+
+- Renamed the distribution and import package to **`contextdoctor`** (the CLI is
+  now `contextdoctor`; the GitHub repository is `pranavbelhekar01/ContextDoctor`).
+- Updated all project URLs, the SARIF `informationUri`, and documentation to point
+  at the `ContextDoctor` repository. No functional changes.
+
 ## [0.1.0] — 2026-07-01
 
 The first release: fully offline static analysis for RAG systems — zero API keys,

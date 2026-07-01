@@ -59,8 +59,8 @@ Drop a live badge in your README (`--format badge` prints the snippet):
 pip install contextdoctor          # from PyPI (once published)
 
 # or, from source:
-git clone https://github.com/pranavbelhekar01/ContextLint
-cd ContextLint
+git clone https://github.com/pranavbelhekar01/ContextDoctor
+cd ContextDoctor
 pip install -e ".[dev]"
 ```
 
@@ -253,7 +253,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pranavbelhekar01/ContextLint@v0.1        # composite action (action.yml)
+      - uses: pranavbelhekar01/ContextDoctor@v0.1        # composite action (action.yml)
         with:
           path: ./knowledge_base
           fail-on: error
@@ -267,7 +267,7 @@ jobs:
 ```yaml
 # .pre-commit-config.yaml
 repos:
-  - repo: https://github.com/pranavbelhekar01/ContextLint
+  - repo: https://github.com/pranavbelhekar01/ContextDoctor
     rev: v0.1.0
     hooks:
       - id: contextdoctor

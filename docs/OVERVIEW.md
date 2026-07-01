@@ -307,7 +307,7 @@ pragmas/select/severity/baseline → compute score → render.**
 ## 9. Release status
 
 The code is feature-complete for v0.1 and **release-ready**. The repository lives
-at **https://github.com/pranavbelhekar01/ContextLint** (private at time of
+at **https://github.com/pranavbelhekar01/ContextDoctor** (private at time of
 writing) and all in-code URLs point there. A tag-triggered **PyPI publish
 workflow** (`.github/workflows/release.yml`, OIDC Trusted Publishing) is included;
 see `RELEASING.md` for the step-by-step.
