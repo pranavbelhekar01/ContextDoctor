@@ -463,6 +463,16 @@ A complete, working example lives in
 content). Plugin loading is best-effort and offline — a broken plugin warns and
 is skipped, and built-in `CTX*` ids can't be silently overridden.
 
+## Documentation
+
+Full guides live in [`docs/`](docs/):
+
+- [Getting Started](docs/getting-started.md) · [User Guide](docs/user-guide.md)
+- [Rules Reference](docs/rules.md) — every rule, why it matters, how to fix it
+- [Configuration](docs/configuration.md) · [CLI Reference](docs/cli.md) · [Python API](docs/api.md)
+- [Plugins](docs/plugins.md) · [Integrations](docs/integrations.md) · [FAQ & Troubleshooting](docs/faq.md)
+- [Technical Overview](docs/OVERVIEW.md) — a single verifiable description of the whole tool
+
 ## How it works
 
 ```
@@ -547,6 +557,15 @@ ContextDoctor is at **v0.1**. Ideas on the table:
 Contributions and issues welcome.
 
 ---
+
+## Contributing & community
+
+Contributions are welcome — bug reports, docs, new rules, parsers, and plugins.
+
+- [CONTRIBUTING.md](CONTRIBUTING.md) — dev setup, the test loop, and how to add a rule
+- [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+- [SECURITY.md](SECURITY.md) — report vulnerabilities privately
+- [Open an issue](https://github.com/pranavbelhekar01/ContextDoctor/issues)
 
 ## License
 

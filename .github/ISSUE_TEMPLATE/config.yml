@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation
+    url: https://github.com/pranavbelhekar01/ContextDoctor/tree/main/docs
+    about: Read the guides before opening an issue — many questions are answered there.
+  - name: Try the playground
+    url: https://pranavbelhekar01.github.io/ContextDoctor/
+    about: Reproduce your case in the browser (runs fully client-side).
+  - name: Security vulnerability
+    url: https://github.com/pranavbelhekar01/ContextDoctor/security/advisories/new
+    about: Report security issues privately — do not open a public issue.
