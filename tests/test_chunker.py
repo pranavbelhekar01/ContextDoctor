@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from contextlint.chunking import chunk_document
-from contextlint.config import Config
+from contextdoctor.chunking import chunk_document
+from contextdoctor.config import Config
 
 
 def test_empty_document_yields_no_chunks():

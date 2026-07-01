@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import json
 
-from contextlint import Config, analyze_chunks, analyze_paths, compute_health
-from contextlint.analyzers import ChunkStatsAnalyzer, ContentQualityAnalyzer
-from contextlint.engine import analyze_path
-from contextlint.models import Severity
-from contextlint.reports import render_badge, render_html, render_sarif
-from contextlint.scoring import compute_health as _ch
+from contextdoctor import Config, analyze_chunks, analyze_paths, compute_health
+from contextdoctor.analyzers import ChunkStatsAnalyzer, ContentQualityAnalyzer
+from contextdoctor.engine import analyze_path
+from contextdoctor.models import Severity
+from contextdoctor.reports import render_badge, render_html, render_sarif
+from contextdoctor.scoring import compute_health as _ch
 from helpers import build_context, make_chunk
 
 # --- Health score ------------------------------------------------------------
@@ -22,7 +22,7 @@ def test_clean_corpus_scores_100():
 
 
 def test_score_decreases_with_severity():
-    from contextlint.models import Finding
+    from contextdoctor.models import Finding
 
     err = Finding("CTX004", Severity.ERROR, "m", "r")
     warn = Finding("CTX001", Severity.WARNING, "m", "r")
@@ -152,7 +152,7 @@ def test_render_sarif(examples_dir):
     report = analyze_path(examples_dir / "messy_docs")
     doc = json.loads(render_sarif(report))
     assert doc["version"] == "2.1.0"
-    assert doc["runs"][0]["tool"]["driver"]["name"] == "ContextLint"
+    assert doc["runs"][0]["tool"]["driver"]["name"] == "ContextDoctor"
     assert len(doc["runs"][0]["results"]) == len(report.findings)
 
 

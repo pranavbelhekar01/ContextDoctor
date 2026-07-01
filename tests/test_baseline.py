@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from contextlint import Config, analyze_chunks
-from contextlint.baseline import (
+from contextdoctor import Config, analyze_chunks
+from contextdoctor.baseline import (
     collect_fingerprints,
     fingerprint,
     load_baseline,
@@ -36,7 +36,7 @@ def test_all_known_findings_are_in_baseline(tmp_path):
 
 
 def test_baseline_via_engine(tmp_path):
-    from contextlint.engine import analyze_paths
+    from contextdoctor.engine import analyze_paths
 
     doc = tmp_path / "big.txt"
     doc.write_text(_BIG, encoding="utf-8")
@@ -52,7 +52,7 @@ def test_baseline_via_engine(tmp_path):
 
 
 def test_new_finding_not_suppressed(tmp_path):
-    from contextlint.engine import analyze_paths
+    from contextdoctor.engine import analyze_paths
 
     doc = tmp_path / "a.txt"
     doc.write_text(_BIG, encoding="utf-8")

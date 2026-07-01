@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from contextlint.analyzers.base import AnalysisContext
-from contextlint.config import Config
-from contextlint.models import Chunk, Document
-from contextlint.utils.text import estimate_tokens, word_count
+from contextdoctor.analyzers.base import AnalysisContext
+from contextdoctor.config import Config
+from contextdoctor.models import Chunk, Document
+from contextdoctor.utils.text import estimate_tokens, word_count
 
 
 def make_chunk(source: str, index: int, doc_index: int, text: str) -> Chunk:

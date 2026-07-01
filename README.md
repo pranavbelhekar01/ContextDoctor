@@ -1,9 +1,9 @@
-# ContextLint
+# ContextDoctor
 
 **A static analyzer for RAG systems and context engineering workflows.**
 Think **ESLint, but for your context** — not your JavaScript.
 
-ContextLint inspects your documents, chunks, and knowledge bases and flags the
+ContextDoctor inspects your documents, chunks, and knowledge bases and flags the
 structural, chunking, and context-quality problems that quietly wreck retrieval
 quality — **before you ever call an LLM.**
 
@@ -21,7 +21,7 @@ quality — **before you ever call an LLM.**
 > they're *context* problems: chunks that are too big or too small, duplicated
 > passages crowding out diverse results, tables shredded across chunk
 > boundaries, and related facts scattered so far apart that no retriever can
-> reassemble them. ContextLint helps you answer **"why is my RAG system
+> reassemble them. ContextDoctor helps you answer **"why is my RAG system
 > performing poorly?"** *statically*, in seconds, for free.
 
 ### Where it fits
@@ -29,9 +29,9 @@ quality — **before you ever call an LLM.**
 RAG evaluation tools like **RAGAS, TruLens, DeepEval, and Phoenix** are runtime,
 LLM-as-judge, *post-retrieval* — they need a running pipeline, test queries, and
 API calls, and they measure the *answer*. None of them check whether your
-**knowledge base was worth retrieving from in the first place.** ContextLint owns
+**knowledge base was worth retrieving from in the first place.** ContextDoctor owns
 that missing **pre-retrieval, pre-index** layer. It's complementary: **lint with
-ContextLint before you index, evaluate with RAGAS/DeepEval after you answer.**
+ContextDoctor before you index, evaluate with RAGAS/DeepEval after you answer.**
 
 ---
 
@@ -56,7 +56,7 @@ Drop a live badge in your README (`--format badge` prints the snippet):
 ## Install
 
 ```bash
-pip install contextlint          # from PyPI (once published)
+pip install contextdoctor          # from PyPI (once published)
 
 # or, from source:
 git clone https://github.com/pranavbelhekar01/ContextLint
@@ -71,14 +71,14 @@ Requires **Python 3.11+**. No other runtime dependencies.
 ## Quick start
 
 ```bash
-contextlint analyze ./docs
+contextdoctor analyze ./docs
 ```
 
 That's it. Point it at a file or a directory of Markdown, plain text, or JSON
 chunk exports, and you get a report like this:
 
 ```text
-  ContextLint  ·  static analysis for RAG
+  ContextDoctor  ·  static analysis for RAG
   ────────────────────────────────────────────────────────────────────
   root: examples/messy_docs
   files: 4   chunks: 15   generated: 2026-07-01T06:19:10Z
@@ -136,14 +136,14 @@ Every finding includes a **severity**, a **description**, a concrete
 List them anytime:
 
 ```bash
-contextlint rules
+contextdoctor rules
 ```
 
 ---
 
 ## The Context Fragmentation Index (CFI) — experimental 🧪
 
-The CFI is ContextLint's flagship experimental signal. It asks a simple
+The CFI is ContextDoctor's flagship experimental signal. It asks a simple
 question: **when the same named thing is discussed in multiple chunks, how far
 apart are those chunks?** Information about one entity scattered across the whole
 corpus is much harder for a retriever to reassemble than information kept close
@@ -166,7 +166,7 @@ together.
 See it in action:
 
 ```bash
-contextlint analyze ./examples/fragmented_kb
+contextdoctor analyze ./examples/fragmented_kb
 # CFI 0.750  ███████████████░░░░░   → CTX006 fires
 ```
 
@@ -174,16 +174,16 @@ contextlint analyze ./examples/fragmented_kb
 
 ## Inputs
 
-ContextLint understands many input types and traverses directories recursively
+ContextDoctor understands many input types and traverses directories recursively
 (skipping hidden files):
 
-- **Markdown** (`.md`, `.markdown`) — chunked by ContextLint's structure-aware chunker.
+- **Markdown** (`.md`, `.markdown`) — chunked by ContextDoctor's structure-aware chunker.
 - **Plain text** (`.txt`) — chunked the same way.
 - **HTML** (`.html`, `.htm`) — tags/scripts/styles stripped, then chunked.
 - **JSON exports** (`.json`) — read as **pre-existing chunks**, so metrics reflect *your* chunking, not ours.
 - **JSONL / NDJSON** (`.jsonl`, `.ndjson`) — one chunk per line.
 - **CSV / TSV** (`.csv`, `.tsv`) — one chunk per row, rendered as `header: value`.
-- **PDF** (`.pdf`) — *optional*: `pip install "contextlint[pdf]"` (keeps the core dependency-free).
+- **PDF** (`.pdf`) — *optional*: `pip install "contextdoctor[pdf]"` (keeps the core dependency-free).
 
 Supported JSON shapes (auto-detected):
 
@@ -202,12 +202,12 @@ Recognised text keys: `text`, `content`, `chunk`, `page_content`, `body`,
 ## Output formats
 
 ```bash
-contextlint analyze ./docs                          # rich terminal report (default)
-contextlint analyze ./docs --format json            # machine-readable JSON
-contextlint analyze ./docs --format markdown -o report.md
-contextlint analyze ./docs --format html -o report.html   # self-contained visual report
-contextlint analyze ./docs --format sarif -o results.sarif  # GitHub code scanning
-contextlint analyze ./docs --format badge           # shields.io endpoint JSON + snippet
+contextdoctor analyze ./docs                          # rich terminal report (default)
+contextdoctor analyze ./docs --format json            # machine-readable JSON
+contextdoctor analyze ./docs --format markdown -o report.md
+contextdoctor analyze ./docs --format html -o report.html   # self-contained visual report
+contextdoctor analyze ./docs --format sarif -o results.sarif  # GitHub code scanning
+contextdoctor analyze ./docs --format badge           # shields.io endpoint JSON + snippet
 ```
 
 The **HTML report** is a single self-contained file (inline CSS + SVG, no JS, no
@@ -219,11 +219,11 @@ Answer *"is recursive or semantic chunking better for my corpus?"* — staticall
 no LLM:
 
 ```bash
-contextlint compare recursive_export.json semantic_export.json
+contextdoctor compare recursive_export.json semantic_export.json
 ```
 
 ```text
-  ContextLint compare
+  ContextDoctor compare
     metric               before       after         Δ
     ──────────────────────────────────────────────────
     health score             71          88       +17
@@ -238,18 +238,18 @@ contextlint compare recursive_export.json semantic_export.json
 Fail the build when issues are found:
 
 ```bash
-contextlint analyze ./docs --fail-on error     # exit 1 on any error-level finding
-contextlint analyze ./docs --fail-on warning   # exit 1 on any warning or worse
+contextdoctor analyze ./docs --fail-on error     # exit 1 on any error-level finding
+contextdoctor analyze ./docs --fail-on warning   # exit 1 on any warning or worse
 ```
 
 **GitHub Action** (findings appear inline on the PR via SARIF):
 
 ```yaml
 # .github/workflows/context.yml
-name: ContextLint
+name: ContextDoctor
 on: [pull_request]
 jobs:
-  contextlint:
+  contextdoctor:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -259,7 +259,7 @@ jobs:
           fail-on: error
       - uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: contextlint.sarif
+          sarif_file: contextdoctor.sarif
 ```
 
 **pre-commit** (`.pre-commit-hooks.yaml` is shipped):
@@ -270,18 +270,18 @@ repos:
   - repo: https://github.com/pranavbelhekar01/ContextLint
     rev: v0.1.0
     hooks:
-      - id: contextlint
+      - id: contextdoctor
 ```
 
 ---
 
 ## Configuration
 
-ContextLint is opinionated but tunable. It auto-discovers a `.contextlint.json`
-or a `[tool.contextlint]` table in `pyproject.toml` near your target, or you can
+ContextDoctor is opinionated but tunable. It auto-discovers a `.contextdoctor.json`
+or a `[tool.contextdoctor]` table in `pyproject.toml` near your target, or you can
 pass one explicitly with `--config`.
 
-`.contextlint.json`:
+`.contextdoctor.json`:
 
 ```json
 {
@@ -299,7 +299,7 @@ pass one explicitly with `--config`.
 Or in `pyproject.toml`:
 
 ```toml
-[tool.contextlint]
+[tool.contextdoctor]
 max_chunk_chars = 1500
 cfi_warning_threshold = 0.5
 ```
@@ -307,7 +307,7 @@ cfi_warning_threshold = 0.5
 Common thresholds can also be overridden on the command line:
 
 ```bash
-contextlint analyze ./docs --chunk-size 800 --max-chunk-chars 1500 --cfi-threshold 0.5
+contextdoctor analyze ./docs --chunk-size 800 --max-chunk-chars 1500 --cfi-threshold 0.5
 ```
 
 | Key | Default | Meaning |
@@ -334,7 +334,7 @@ contextlint analyze ./docs --chunk-size 800 --max-chunk-chars 1500 --cfi-thresho
 Everything the CLI does is available programmatically:
 
 ```python
-from contextlint import analyze_path, Config
+from contextdoctor import analyze_path, Config
 
 report = analyze_path("./docs", Config(max_chunk_chars=1500))
 
@@ -345,7 +345,7 @@ for f in report.findings:
 
 print(report.metrics["fragmentation"]["cfi"])      # experimental CFI
 
-from contextlint.reports import render_html, render_json
+from contextdoctor.reports import render_html, render_json
 open("report.html", "w").write(render_html(report))
 ```
 
@@ -355,7 +355,7 @@ open("report.html", "w").write(render_html(report))
 splitter emitted, before you embed them:
 
 ```python
-from contextlint import analyze_chunks
+from contextdoctor import analyze_chunks
 
 # LangChain
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -383,8 +383,8 @@ issues. Two mechanisms make adoption incremental:
 **Baseline** — freeze today's findings; fail only on *new* ones:
 
 ```bash
-contextlint baseline ./docs                       # writes .contextlint-baseline.json
-contextlint analyze ./docs --baseline .contextlint-baseline.json --fail-on warning
+contextdoctor baseline ./docs                       # writes .contextdoctor-baseline.json
+contextdoctor analyze ./docs --baseline .contextdoctor-baseline.json --fail-on warning
 # -> pre-existing findings are suppressed; only regressions surface (and count against the score)
 ```
 
@@ -392,15 +392,15 @@ contextlint analyze ./docs --baseline .contextlint-baseline.json --fail-on warni
 for the legitimate cases (e.g. a doc that *shows* an example API key):
 
 ```markdown
-<!-- contextlint: disable=CTX007 -->        # disable one or more rules for this file
-<!-- contextlint: disable=CTX003,CTX008 --> # comma-separated
-<!-- contextlint: disable-all -->           # disable everything for this file
+<!-- contextdoctor: disable=CTX007 -->        # disable one or more rules for this file
+<!-- contextdoctor: disable=CTX003,CTX008 --> # comma-separated
+<!-- contextdoctor: disable-all -->           # disable everything for this file
 ```
 
 ## Playground
 
 Want to try it without installing anything? The
-[browser playground](playground/) runs the entire ContextLint engine in
+[browser playground](playground/) runs the entire ContextDoctor engine in
 WebAssembly (Pyodide) — paste your chunks, get a score and a full report, and
 **nothing is uploaded**. It works because the core has zero dependencies. Deploy
 your own to GitHub Pages with the included workflow, or run it locally:
@@ -411,18 +411,18 @@ python -m http.server -d playground 8000   # then open http://localhost:8000
 
 ## Custom rules & plugins
 
-ContextLint is extensible. A plugin is just an `Analyzer` subclass that declares
+ContextDoctor is extensible. A plugin is just an `Analyzer` subclass that declares
 the rules it emits — and those rules then flow through **everything**: the health
-score, all report formats, SARIF, `contextlint rules`, and `--select` /
+score, all report formats, SARIF, `contextdoctor rules`, and `--select` /
 `--ignore`, exactly like the built-in `CTX*` rules.
 
 The lowest-friction path is a single local file:
 
 ```python
 # my_rules.py
-from contextlint.analyzers import AnalysisContext, Analyzer
-from contextlint.models import AnalyzerResult, Location, Severity
-from contextlint.rules import Rule
+from contextdoctor.analyzers import AnalysisContext, Analyzer
+from contextdoctor.models import AnalyzerResult, Location, Severity
+from contextdoctor.rules import Rule
 
 class TodoAnalyzer(Analyzer):
     name = "todo"
@@ -441,7 +441,7 @@ class TodoAnalyzer(Analyzer):
 ```
 
 ```bash
-contextlint analyze ./docs --plugin ./my_rules.py
+contextdoctor analyze ./docs --plugin ./my_rules.py
 ```
 
 Three ways to load, in increasing order of packaging effort:
@@ -450,12 +450,12 @@ Three ways to load, in increasing order of packaging effort:
 | --- | --- |
 | Local `.py` file | `--plugin ./my_rules.py` or `{"plugins": ["./my_rules.py"]}` |
 | Importable module | `--plugin my_pkg.rules` or `my_pkg.rules:TodoAnalyzer` |
-| Published package (auto-discovered) | entry point `contextlint.analyzers` in `pyproject.toml` |
+| Published package (auto-discovered) | entry point `contextdoctor.analyzers` in `pyproject.toml` |
 
 ```toml
 # a distributable plugin package advertises itself; no config needed by users
-[project.entry-points."contextlint.analyzers"]
-my-rules = "contextlint_plugin_myrules:TodoAnalyzer"
+[project.entry-points."contextdoctor.analyzers"]
+my-rules = "contextdoctor_plugin_myrules:TodoAnalyzer"
 ```
 
 A complete, working example lives in
@@ -466,7 +466,7 @@ is skipped, and built-in `CTX*` ids can't be silently overridden.
 ## How it works
 
 ```
-contextlint/
+contextdoctor/
 ├── cli.py            # argparse CLI: analyze / compare / rules
 ├── config.py         # thresholds + config discovery (.json / pyproject.toml)
 ├── engine.py         # discover → chunk → analyze → filter → score → Report
@@ -509,10 +509,10 @@ and Windows in CI.
 
 ### Adding a rule
 
-1. Add the rule metadata to `contextlint/rules/registry.py`.
-2. Emit findings for it from a new or existing analyzer in `contextlint/analyzers/`
+1. Add the rule metadata to `contextdoctor/rules/registry.py`.
+2. Emit findings for it from a new or existing analyzer in `contextdoctor/analyzers/`
    (subclass `Analyzer`, use `self._finding(...)`).
-3. Register the analyzer in `contextlint/analyzers/__init__.py`.
+3. Register the analyzer in `contextdoctor/analyzers/__init__.py`.
 4. Add tests and an example that triggers it.
 
 ---
@@ -524,19 +524,19 @@ The [`examples/`](examples/) directory ships datasets you can run immediately:
 - [`examples/clean_docs/`](examples/clean_docs) — well-structured docs; scores 100/100.
 - [`examples/messy_docs/`](examples/messy_docs) — triggers CTX001–CTX005 and CTX010 (oversized/tiny chunks, duplicates, a broken table, heading fragmentation, embedding-limit).
 - [`examples/risky_docs/`](examples/risky_docs) — a support log that leaked secrets, PII, and mojibake into the KB (CTX007–CTX009). Values are always redacted.
-- [`examples/fragmented_kb/`](examples/fragmented_kb) — a scattered knowledge base that triggers the experimental CFI (CTX006), with its own `.contextlint.json`.
+- [`examples/fragmented_kb/`](examples/fragmented_kb) — a scattered knowledge base that triggers the experimental CFI (CTX006), with its own `.contextdoctor.json`.
 
 ```bash
-contextlint analyze ./examples/messy_docs
-contextlint analyze ./examples/risky_docs
-contextlint analyze ./examples/fragmented_kb
+contextdoctor analyze ./examples/messy_docs
+contextdoctor analyze ./examples/risky_docs
+contextdoctor analyze ./examples/fragmented_kb
 ```
 
 ---
 
 ## Roadmap
 
-ContextLint is at **v0.1**. Ideas on the table:
+ContextDoctor is at **v0.1**. Ideas on the table:
 
 - More rules: boilerplate/nav-chrome detection, orphaned references, language mixing.
 - More parsers: `.rst`, DOCX, and richer HTML (readability-style main-content extraction).

@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from contextlint.analyzers import FragmentationAnalyzer
-from contextlint.config import Config
+from contextdoctor.analyzers import FragmentationAnalyzer
+from contextdoctor.config import Config
 from helpers import build_context
 
 

@@ -1,6 +1,6 @@
 # API Quickstart
 
-<!-- contextlint: disable=CTX007 -->
+<!-- contextdoctor: disable=CTX007 -->
 
 This tutorial shows the shape of an API key so readers recognise one. The example
 below is illustrative documentation, not a real credential, so we opt this file

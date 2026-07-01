@@ -2,7 +2,7 @@
   "permissions": {
     "allow": [
       "Bash(python -m pip install -e . -q)",
-      "Bash(python -c \"import contextlint; print\\('version', contextlint.__version__\\)\")"
+      "Bash(python -c \"import contextdoctor; print\\('version', contextdoctor.__version__\\)\")"
     ]
   }
 }

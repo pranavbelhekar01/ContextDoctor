@@ -6,19 +6,19 @@ from pathlib import Path
 
 import pytest
 
-from contextlint import Config, analyze_chunks
-from contextlint.engine import analyze_path
-from contextlint.models import Severity
-from contextlint.plugins import discover_entry_point_analyzers, load_module_analyzers
-from contextlint.rules import RULES, Rule, get_rule, register_rule
+from contextdoctor import Config, analyze_chunks
+from contextdoctor.engine import analyze_path
+from contextdoctor.models import Severity
+from contextdoctor.plugins import discover_entry_point_analyzers, load_module_analyzers
+from contextdoctor.rules import RULES, Rule, get_rule, register_rule
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-EXAMPLE_PLUGIN = REPO_ROOT / "examples" / "plugin" / "contextlint_placeholder_plugin.py"
+EXAMPLE_PLUGIN = REPO_ROOT / "examples" / "plugin" / "contextdoctor_placeholder_plugin.py"
 
 _PLUGIN_SRC = """
-from contextlint.analyzers import AnalysisContext, Analyzer
-from contextlint.models import AnalyzerResult, Location, Severity
-from contextlint.rules import Rule
+from contextdoctor.analyzers import AnalysisContext, Analyzer
+from contextdoctor.models import AnalyzerResult, Location, Severity
+from contextdoctor.rules import Rule
 
 class BananaAnalyzer(Analyzer):
     name = "banana"
@@ -139,6 +139,6 @@ def test_entry_point_discovery(monkeypatch, tmp_path):
         def load(self):
             return banana_cls
 
-    monkeypatch.setattr("contextlint.plugins.metadata.entry_points", lambda group: [FakeEP()])
+    monkeypatch.setattr("contextdoctor.plugins.metadata.entry_points", lambda group: [FakeEP()])
     found = discover_entry_point_analyzers()
     assert banana_cls in found

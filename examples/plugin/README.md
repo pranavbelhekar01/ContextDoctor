@@ -1,11 +1,11 @@
-# Writing a ContextLint plugin
+# Writing a ContextDoctor plugin
 
 A plugin is just an `Analyzer` subclass that (optionally) declares the rules it
-emits. ContextLint registers those rules automatically, so they flow through the
-health score, every report format, SARIF, `contextlint rules`, and
+emits. ContextDoctor registers those rules automatically, so they flow through the
+health score, every report format, SARIF, `contextdoctor rules`, and
 `--select` / `--ignore` — exactly like the built-in `CTX*` rules.
 
-[`contextlint_placeholder_plugin.py`](contextlint_placeholder_plugin.py) is a
+[`contextdoctor_placeholder_plugin.py`](contextdoctor_placeholder_plugin.py) is a
 complete, working example: it adds rule **`PLH001`**, which flags unfinished
 content (`TODO`, `FIXME`, `lorem ipsum`, …) that shouldn't be in a knowledge base.
 
@@ -13,11 +13,11 @@ content (`TODO`, `FIXME`, `lorem ipsum`, …) that shouldn't be in a knowledge b
 
 ```bash
 # Point --plugin at the file, then analyze anything:
-contextlint analyze ./examples/messy_docs \
-  --plugin examples/plugin/contextlint_placeholder_plugin.py
+contextdoctor analyze ./examples/messy_docs \
+  --plugin examples/plugin/contextdoctor_placeholder_plugin.py
 
 # See the plugin's rule listed alongside the built-ins:
-contextlint rules --plugin examples/plugin/contextlint_placeholder_plugin.py
+contextdoctor rules --plugin examples/plugin/contextdoctor_placeholder_plugin.py
 ```
 
 ## The three ways to load a plugin
@@ -31,18 +31,18 @@ contextlint rules --plugin examples/plugin/contextlint_placeholder_plugin.py
 For a distributable package, expose an entry point in your `pyproject.toml`:
 
 ```toml
-[project.entry-points."contextlint.analyzers"]
-placeholder = "contextlint_placeholder_plugin:PlaceholderAnalyzer"
+[project.entry-points."contextdoctor.analyzers"]
+placeholder = "contextdoctor_placeholder_plugin:PlaceholderAnalyzer"
 ```
 
-Once installed, ContextLint discovers it with no configuration at all.
+Once installed, ContextDoctor discovers it with no configuration at all.
 
 ## The contract
 
 ```python
-from contextlint.analyzers import AnalysisContext, Analyzer
-from contextlint.models import AnalyzerResult, Location, Severity
-from contextlint.rules import Rule
+from contextdoctor.analyzers import AnalysisContext, Analyzer
+from contextdoctor.models import AnalyzerResult, Location, Severity
+from contextdoctor.rules import Rule
 
 class MyAnalyzer(Analyzer):
     name = "my_rules"

@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import json
 
-from contextlint.config import Config
-from contextlint.parsers import discover_files, load_document
+from contextdoctor.config import Config
+from contextdoctor.parsers import discover_files, load_document
 
 
 def test_discover_skips_hidden_and_unsupported(tmp_path):
@@ -13,7 +13,7 @@ def test_discover_skips_hidden_and_unsupported(tmp_path):
     (tmp_path / "b.txt").write_text("b", encoding="utf-8")
     (tmp_path / "c.json").write_text("[]", encoding="utf-8")
     (tmp_path / "ignore.py").write_text("x = 1", encoding="utf-8")
-    (tmp_path / ".contextlint.json").write_text("{}", encoding="utf-8")
+    (tmp_path / ".contextdoctor.json").write_text("{}", encoding="utf-8")
     hidden = tmp_path / ".hidden"
     hidden.mkdir()
     (hidden / "secret.md").write_text("no", encoding="utf-8")

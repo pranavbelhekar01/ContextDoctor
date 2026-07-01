@@ -4,11 +4,11 @@ from __future__ import annotations
 
 import json
 
-from contextlint.config import Config
-from contextlint.engine import analyze_path, worst_severity
-from contextlint.models import Severity
-from contextlint.reports import render, render_json, render_markdown, render_terminal
-from contextlint.reports.json_report import report_to_dict
+from contextdoctor.config import Config
+from contextdoctor.engine import analyze_path, worst_severity
+from contextdoctor.models import Severity
+from contextdoctor.reports import render, render_json, render_markdown, render_terminal
+from contextdoctor.reports.json_report import report_to_dict
 
 
 def test_analyze_examples_messy(examples_dir):
@@ -26,7 +26,7 @@ def test_analyze_examples_clean_has_no_errors(examples_dir):
 
 
 def test_analyze_fragmented_kb_triggers_cfi(examples_dir):
-    # Uses the directory's own .contextlint.json via discovery in the CLI; here we
+    # Uses the directory's own .contextdoctor.json via discovery in the CLI; here we
     # pass an equivalent config explicitly.
     config = Config(chunk_size=520, chunk_overlap=0, cfi_warning_threshold=0.6)
     report = analyze_path(examples_dir / "fragmented_kb", config)
@@ -49,7 +49,7 @@ def test_worst_severity(examples_dir):
 def test_render_json_is_valid(examples_dir):
     report = analyze_path(examples_dir / "messy_docs", Config())
     payload = json.loads(render_json(report))
-    assert payload["tool"] == "contextlint"
+    assert payload["tool"] == "contextdoctor"
     assert "summary" in payload
     assert "findings" in payload
     assert payload["summary"]["findings"] == len(report.findings)
@@ -58,7 +58,7 @@ def test_render_json_is_valid(examples_dir):
 def test_render_markdown_contains_sections(examples_dir):
     report = analyze_path(examples_dir / "messy_docs", Config())
     md = render_markdown(report)
-    assert "# ContextLint Report" in md
+    assert "# ContextDoctor Report" in md
     assert "## Findings" in md
     assert "Context Fragmentation Index" in md
 
@@ -66,7 +66,7 @@ def test_render_markdown_contains_sections(examples_dir):
 def test_render_terminal_plain(examples_dir):
     report = analyze_path(examples_dir / "clean_docs", Config())
     text = render_terminal(report, color=False)
-    assert "ContextLint" in text
+    assert "ContextDoctor" in text
     assert "\033[" not in text  # no ANSI when colour disabled
 
 

@@ -1,4 +1,4 @@
-name: "ContextLint"
+name: "ContextDoctor"
 description: "Static analysis for RAG systems — lint your context before you ever call an LLM."
 branding:
   icon: "search"
@@ -16,13 +16,13 @@ inputs:
   output:
     description: "Write the report to this file (recommended for sarif/html/json)."
     required: false
-    default: "contextlint.sarif"
+    default: "contextdoctor.sarif"
   fail-on:
     description: "Fail the job on findings at or above this severity (error|warning|info). Empty = never fail."
     required: false
     default: ""
   version:
-    description: "ContextLint version specifier to install (e.g. '==0.1.0')."
+    description: "ContextDoctor version specifier to install (e.g. '==0.1.0')."
     required: false
     default: ""
   extra-args:
@@ -33,18 +33,18 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Install ContextLint
+    - name: Install ContextDoctor
       shell: bash
-      run: python -m pip install --upgrade "contextlint${{ inputs.version }}"
+      run: python -m pip install --upgrade "contextdoctor${{ inputs.version }}"
 
-    - name: Run ContextLint
+    - name: Run ContextDoctor
       shell: bash
       run: |
         FAIL_ARG=""
         if [ -n "${{ inputs.fail-on }}" ]; then
           FAIL_ARG="--fail-on ${{ inputs.fail-on }}"
         fi
-        contextlint analyze "${{ inputs.path }}" \
+        contextdoctor analyze "${{ inputs.path }}" \
           --format "${{ inputs.format }}" \
           --output "${{ inputs.output }}" \
           $FAIL_ARG ${{ inputs.extra-args }}

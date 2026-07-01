@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import json
 
-from contextlint.cli import main
-from contextlint.config import Config
+from contextdoctor.cli import main
+from contextdoctor.config import Config
 
 # --- Config ------------------------------------------------------------------
 
@@ -17,14 +17,14 @@ def test_config_from_dict_ignores_unknown_keys():
 
 
 def test_config_load_json(tmp_path):
-    p = tmp_path / ".contextlint.json"
+    p = tmp_path / ".contextdoctor.json"
     p.write_text(json.dumps({"max_chunk_chars": 4321}), encoding="utf-8")
     cfg = Config.load(p)
     assert cfg.max_chunk_chars == 4321
 
 
 def test_config_discover_json(tmp_path):
-    (tmp_path / ".contextlint.json").write_text(
+    (tmp_path / ".contextdoctor.json").write_text(
         json.dumps({"min_chunk_chars": 7}), encoding="utf-8"
     )
     sub = tmp_path / "docs"
@@ -35,7 +35,7 @@ def test_config_discover_json(tmp_path):
 
 def test_config_discover_pyproject(tmp_path):
     (tmp_path / "pyproject.toml").write_text(
-        "[tool.contextlint]\nmax_chunk_chars = 1234\n", encoding="utf-8"
+        "[tool.contextdoctor]\nmax_chunk_chars = 1234\n", encoding="utf-8"
     )
     cfg = Config.discover(tmp_path)
     assert cfg.max_chunk_chars == 1234
@@ -53,7 +53,7 @@ def test_cli_analyze_terminal(examples_dir, capsys):
     rc = main(["analyze", str(examples_dir / "clean_docs"), "--no-color"])
     out = capsys.readouterr().out
     assert rc == 0
-    assert "ContextLint" in out
+    assert "ContextDoctor" in out
 
 
 def test_cli_analyze_json(examples_dir, capsys):
@@ -61,7 +61,7 @@ def test_cli_analyze_json(examples_dir, capsys):
     out = capsys.readouterr().out
     assert rc == 0
     payload = json.loads(out)
-    assert payload["tool"] == "contextlint"
+    assert payload["tool"] == "contextdoctor"
 
 
 def test_cli_fail_on_error(examples_dir, capsys):
@@ -99,7 +99,7 @@ def test_cli_output_file(examples_dir, tmp_path, capsys):
     )
     assert rc == 0
     assert out_file.exists()
-    assert "# ContextLint Report" in out_file.read_text(encoding="utf-8")
+    assert "# ContextDoctor Report" in out_file.read_text(encoding="utf-8")
 
 
 def test_cli_threshold_override(examples_dir, capsys):

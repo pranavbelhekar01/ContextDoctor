@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>ContextLint Playground — lint your RAG context in the browser</title>
+<title>ContextDoctor Playground — lint your RAG context in the browser</title>
 <meta name="description"
   content="Paste your chunks and get a Context Health Score. Runs entirely in your browser via Pyodide — nothing is uploaded." />
 <style>
@@ -46,7 +46,7 @@
 </head>
 <body>
 <header>
-  <h1>🔎 ContextLint Playground</h1>
+  <h1>🔎 ContextDoctor Playground</h1>
   <span class="tag">lint your RAG context — no install, no upload</span>
   <span class="privacy">🔒 Runs 100% in your browser (Pyodide). Nothing leaves this page.</span>
 </header>
@@ -66,15 +66,15 @@
 
 Separate chunks with a blank line, or switch the Input dropdown to paste a JSON array / JSONL export of your chunks."></textarea>
     <div class="hint">
-      Tip: this is the same engine as the <code>contextlint</code> CLI. Install it with
-      <code>pip install contextlint</code> to run it in CI. •
+      Tip: this is the same engine as the <code>contextdoctor</code> CLI. Install it with
+      <code>pip install contextdoctor</code> to run it in CI. •
       <a href="https://github.com/pranavbelhekar01/ContextLint" target="_blank" rel="noopener">GitHub</a>
     </div>
   </section>
 
   <section class="right">
     <div id="status" class="status">Booting the Python runtime (first load downloads ~10&nbsp;MB, then it's cached)…</div>
-    <iframe id="report" title="ContextLint report" style="display:none"></iframe>
+    <iframe id="report" title="ContextDoctor report" style="display:none"></iframe>
   </section>
 </main>
 
@@ -110,18 +110,18 @@ document.getElementById("sample").addEventListener("change", (e) => {
 async function boot() {
   try {
     pyodide = await loadPyodide();
-    statusEl.textContent = "Installing ContextLint…";
+    statusEl.textContent = "Installing ContextDoctor…";
     await pyodide.loadPackage("micropip");
     await pyodide.runPythonAsync(`
 import micropip
-await micropip.install("contextlint")
-import contextlint
+await micropip.install("contextdoctor")
+import contextdoctor
 `);
     statusEl.textContent = "Ready. Paste chunks and click Analyze.";
     runBtn.disabled = false;
     runBtn.textContent = "Analyze";
   } catch (err) {
-    statusEl.innerHTML = "Could not load ContextLint from PyPI (are you offline, or is the "
+    statusEl.innerHTML = "Could not load ContextDoctor from PyPI (are you offline, or is the "
       + "package not published yet?).<br>Error: " + String(err);
   }
 }
@@ -136,8 +136,8 @@ async function analyze() {
   try {
     const html = await pyodide.runPythonAsync(`
 import json
-from contextlint import analyze_chunks
-from contextlint.reports import render_html
+from contextdoctor import analyze_chunks
+from contextdoctor.reports import render_html
 
 raw = RAW_INPUT
 if MODE == "jsonl":

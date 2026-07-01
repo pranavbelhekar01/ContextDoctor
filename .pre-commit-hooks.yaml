@@ -1,7 +1,7 @@
-- id: contextlint
-  name: ContextLint
+- id: contextdoctor
+  name: ContextDoctor
   description: Static analysis for RAG context, chunks, and knowledge bases.
-  entry: contextlint analyze
+  entry: contextdoctor analyze
   language: python
   files: \.(md|markdown|txt|json)$
   args: ["--fail-on", "error"]

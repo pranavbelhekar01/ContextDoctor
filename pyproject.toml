@@ -3,7 +3,7 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "contextlint"
+name = "contextdoctor"
 version = "0.1.0"
 description = "A static analyzer for RAG systems and context engineering workflows. ESLint for your context."
 readme = "README.md"
@@ -40,14 +40,14 @@ dev = [
 ]
 
 [project.scripts]
-contextlint = "contextlint.cli:main"
+contextdoctor = "contextdoctor.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["contextlint*"]
+include = ["contextdoctor*"]
 
 [tool.setuptools.package-data]
-contextlint = ["py.typed"]
+contextdoctor = ["py.typed"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -56,7 +56,7 @@ addopts = "-q"
 [tool.ruff]
 line-length = 100
 target-version = "py311"
-src = ["contextlint", "tests"]
+src = ["contextdoctor", "tests"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "C4", "SIM", "RUF"]
@@ -69,4 +69,4 @@ ignore = [
 ]
 
 [tool.ruff.lint.isort]
-known-first-party = ["contextlint"]
+known-first-party = ["contextdoctor"]

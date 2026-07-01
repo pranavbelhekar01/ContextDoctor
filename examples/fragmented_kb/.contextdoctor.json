@@ -1,0 +1,6 @@
+{
+  "chunk_size": 520,
+  "chunk_overlap": 0,
+  "min_entity_freq": 2,
+  "cfi_warning_threshold": 0.6
+}

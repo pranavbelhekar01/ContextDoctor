@@ -6,10 +6,10 @@ from pathlib import Path
 
 import pytest
 
-from contextlint import Config, analyze_path, analyze_paths
-from contextlint.parsers.formats import csv_rows_to_chunks, html_to_text, jsonl_to_texts
-from contextlint.parsers.loader import load_document
-from contextlint.parsers.pragmas import parse_disabled_rules
+from contextdoctor import Config, analyze_path, analyze_paths
+from contextdoctor.parsers.formats import csv_rows_to_chunks, html_to_text, jsonl_to_texts
+from contextdoctor.parsers.loader import load_document
+from contextdoctor.parsers.pragmas import parse_disabled_rules
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 MIXED = REPO_ROOT / "examples" / "mixed_formats"
@@ -97,16 +97,16 @@ def test_unreadable_pdf_is_skipped(tmp_path):
 
 
 def test_parse_disabled_rules():
-    assert parse_disabled_rules("<!-- contextlint: disable=CTX007 -->") == {"CTX007"}
-    assert parse_disabled_rules("contextlint: disable=CTX003, CTX008") == {"CTX003", "CTX008"}
-    assert parse_disabled_rules("contextlint: disable-all") == {"*"}
+    assert parse_disabled_rules("<!-- contextdoctor: disable=CTX007 -->") == {"CTX007"}
+    assert parse_disabled_rules("contextdoctor: disable=CTX003, CTX008") == {"CTX003", "CTX008"}
+    assert parse_disabled_rules("contextdoctor: disable-all") == {"*"}
     assert parse_disabled_rules("nothing here") == set()
 
 
 def test_pragma_suppresses_finding(tmp_path):
     f = tmp_path / "doc.md"
     f.write_text(
-        "<!-- contextlint: disable=CTX007 -->\n\nkey=sk-ABCDEFGHIJKLMNOPQRSTUVWX1234567890\n",
+        "<!-- contextdoctor: disable=CTX007 -->\n\nkey=sk-ABCDEFGHIJKLMNOPQRSTUVWX1234567890\n",
         encoding="utf-8",
     )
     report = analyze_path(tmp_path)

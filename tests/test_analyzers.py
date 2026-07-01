@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from contextlint.analyzers import (
+from contextdoctor.analyzers import (
     ChunkStatsAnalyzer,
     DuplicateAnalyzer,
     TableAnalyzer,
 )
-from contextlint.config import Config
-from contextlint.engine import analyze_path
+from contextdoctor.config import Config
+from contextdoctor.engine import analyze_path
 from helpers import build_context
 
 

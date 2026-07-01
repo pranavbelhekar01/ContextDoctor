@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from contextlint.utils.hashing import (
+from contextdoctor.utils.hashing import (
     content_hash,
     minhash_signature,
     minhash_similarity,
 )
-from contextlint.utils.nlp import entity_set, extract_entities
-from contextlint.utils.text import (
+from contextdoctor.utils.nlp import entity_set, extract_entities
+from contextdoctor.utils.text import (
     estimate_tokens,
     jaccard,
     line_starts,

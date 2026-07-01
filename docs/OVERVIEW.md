@@ -1,23 +1,23 @@
-# ContextLint — Complete Technical Overview
+# ContextDoctor — Complete Technical Overview
 
-*A verifiable, self-contained description of what ContextLint is, what it provides,
+*A verifiable, self-contained description of what ContextDoctor is, what it provides,
 and how everything works. Every claim here can be checked against the code in this
 repository or reproduced with the commands in the "Verify it yourself" section at
 the end.*
 
-- **Name / version:** ContextLint `0.1.0`
+- **Name / version:** ContextDoctor `0.1.0`
 - **Language / runtime:** Python `>= 3.11` (developed and tested on 3.13)
 - **Runtime dependencies:** **none** (standard library only)
 - **License:** MIT
 - **Size:** ~4,056 lines across 38 Python modules in the package; ~1,273 lines of tests
 - **Tests:** **115 passing, 0 failing; 93% line coverage**
-- **Distributable:** pure-Python wheel, ~66 KB (`contextlint-0.1.0-py3-none-any.whl`)
+- **Distributable:** pure-Python wheel, ~66 KB (`contextdoctor-0.1.0-py3-none-any.whl`)
 
 ---
 
 ## 1. What it is (one paragraph)
 
-ContextLint is a **static analyzer for RAG (Retrieval-Augmented Generation)
+ContextDoctor is a **static analyzer for RAG (Retrieval-Augmented Generation)
 systems and context-engineering workflows** — "ESLint for your context." It
 inspects documents, chunks, and knowledge bases and reports structural,
 chunking, and content-quality problems **before an LLM is ever invoked**. It runs
@@ -35,11 +35,11 @@ whether the **knowledge base itself was worth retrieving from** — i.e.
 pre-retrieval data quality (stale, duplicated, mis-chunked, secret-leaking, or
 fragmented content).
 
-ContextLint occupies that **pre-retrieval, pre-index** layer. It is
-**complementary, not competitive**: *lint with ContextLint before you index;
+ContextDoctor occupies that **pre-retrieval, pre-index** layer. It is
+**complementary, not competitive**: *lint with ContextDoctor before you index;
 evaluate with RAGAS/DeepEval after you answer.* This is the central design thesis
 and the differentiator you can cross-check against the feature sets of the tools
-named above (they are all runtime evaluators; ContextLint is a static linter).
+named above (they are all runtime evaluators; ContextDoctor is a static linter).
 
 ## 3. Design principles
 
@@ -130,7 +130,7 @@ Directory traversal is recursive and skips hidden files.
 - **JSON** (`.json`) — read as **pre-existing chunks** (your chunking, not ours).
 - **JSONL / NDJSON** (`.jsonl`, `.ndjson`) — one chunk per line.
 - **CSV / TSV** (`.csv`, `.tsv`) — one chunk per row, rendered as `header: value`.
-- **PDF** (`.pdf`) — **optional** (`pip install "contextlint[pdf]"`, uses `pypdf`);
+- **PDF** (`.pdf`) — **optional** (`pip install "contextdoctor[pdf]"`, uses `pypdf`);
   the core stays dependency-free. Unreadable files are skipped with a warning,
   never fatal.
 
@@ -151,11 +151,11 @@ passages`.
 - **badge** — shields.io endpoint JSON + a paste-ready Markdown snippet.
 
 ### 4.7 Commands (CLI)
-- `contextlint analyze <path...>` — analyze one or more files/dirs.
-- `contextlint compare <a> <b>` — side-by-side A/B of two corpora / chunking
+- `contextdoctor analyze <path...>` — analyze one or more files/dirs.
+- `contextdoctor compare <a> <b>` — side-by-side A/B of two corpora / chunking
   strategies with health-score and metric deltas (terminal or JSON).
-- `contextlint baseline <path...>` — write a baseline of current findings.
-- `contextlint rules` — list all rules (including plugin rules).
+- `contextdoctor baseline <path...>` — write a baseline of current findings.
+- `contextdoctor rules` — list all rules (including plugin rules).
 
 Key `analyze` flags: `--format`, `--output/-o`, `--config/-c`, `--fail-on`
 (CI gating; exit 1 at/above a severity), `--select` / `--ignore` (rule ids),
@@ -172,11 +172,11 @@ fail-on triggered, `2` usage/path error.
   - LangChain: `analyze_chunks([d.page_content for d in docs])`
   - LlamaIndex: `analyze_chunks([n.get_content() for n in nodes])`
 - `compute_health(findings) -> HealthScore`
-- Report renderers in `contextlint.reports`: `render_json/markdown/html/sarif/
+- Report renderers in `contextdoctor.reports`: `render_json/markdown/html/sarif/
   terminal/badge`.
 
 ### 4.9 Configuration
-Auto-discovered from `.contextlint.json` or a `[tool.contextlint]` table in
+Auto-discovered from `.contextdoctor.json` or a `[tool.contextdoctor]` table in
 `pyproject.toml` (walking up from the target), or passed via `--config`. Keys
 include: `chunk_size`, `chunk_overlap`, `max_chunk_chars`, `min_chunk_chars`,
 `embedding_token_limit`, `shingle_size`, `near_duplicate_threshold`,
@@ -188,7 +188,7 @@ include: `chunk_size`, `chunk_overlap`, `max_chunk_chars`, `min_chunk_chars`,
 ### 4.10 Adoption mechanisms
 - **Baseline files** — freeze existing findings; only *new* ones are reported and
   affect the score. Coarse `rule + files` fingerprints survive edits/re-chunking.
-- **Inline disable pragmas** — file-scoped `<!-- contextlint: disable=CTX007 -->`
+- **Inline disable pragmas** — file-scoped `<!-- contextdoctor: disable=CTX007 -->`
   (comma lists supported) and `disable-all`, for legit cases like a doc that
   *shows* an example key.
 - **Rule selection & severity** — `select`/`ignore` and per-rule `severity`
@@ -197,11 +197,11 @@ include: `chunk_size`, `chunk_overlap`, `max_chunk_chars`, `min_chunk_chars`,
 ### 4.11 Plugin system (extensibility / the "moat")
 A plugin is an `Analyzer` subclass that declares `provides_rules = [Rule(...)]`.
 Its rules flow through the health score, **all** report formats, SARIF,
-`contextlint rules`, and `--select`/`--ignore` — identical to built-in rules.
+`contextdoctor rules`, and `--select`/`--ignore` — identical to built-in rules.
 Three loading paths:
 1. **Local `.py` file** — `--plugin ./my_rules.py` or `{"plugins": ["./my_rules.py"]}`.
 2. **Importable module** — `my_pkg.rules` or `my_pkg.rules:MyAnalyzer`.
-3. **Published package** — a `contextlint.analyzers` entry point (auto-discovered).
+3. **Published package** — a `contextdoctor.analyzers` entry point (auto-discovered).
 
 Loading is best-effort (a broken plugin warns and is skipped); built-in `CTX*`
 ids cannot be silently overridden. A complete working example ships in
@@ -209,7 +209,7 @@ ids cannot be silently overridden. A complete working example ships in
 
 ### 4.12 CI / ecosystem integrations
 - **GitHub Action** (`action.yml`, composite) — run in a workflow, emit SARIF.
-- **pre-commit hook** (`.pre-commit-hooks.yaml`) — `id: contextlint`.
+- **pre-commit hook** (`.pre-commit-hooks.yaml`) — `id: contextdoctor`.
 - **SARIF upload** — findings appear inline on pull requests.
 - **GitHub Pages workflow** (`.github/workflows/pages.yml`) — deploys the playground.
 - **CI matrix** (`.github/workflows/ci.yml`) — Python 3.11/3.12/3.13 on Linux,
@@ -217,11 +217,11 @@ ids cannot be silently overridden. A complete working example ships in
 
 ### 4.13 Browser playground (WASM)
 `playground/index.html` is a **static, zero-server, zero-upload** page that runs
-the **entire ContextLint engine in the browser** via Pyodide (WebAssembly). Paste
+the **entire ContextDoctor engine in the browser** via Pyodide (WebAssembly). Paste
 chunks (blank-line blocks or JSON/JSONL), click Analyze, and it renders the
 self-contained HTML report inline. It works precisely because the core has zero
 dependencies. *(Verified end-to-end in a real browser: Pyodide loaded, the wheel
-installed via micropip, `import contextlint` succeeded, and an analysis produced a
+installed via micropip, `import contextdoctor` succeeded, and an analysis produced a
 correct, redacted report entirely client-side.)*
 
 ---
@@ -229,7 +229,7 @@ correct, redacted report entirely client-side.)*
 ## 5. Architecture (module map)
 
 ```
-contextlint/
+contextdoctor/
 ├── cli.py            # argparse CLI: analyze / compare / baseline / rules
 ├── config.py         # thresholds + config discovery (.json / pyproject.toml)
 ├── engine.py         # discover → chunk → analyze → pragmas → filter → baseline → score → Report
@@ -254,7 +254,7 @@ pragmas/select/severity/baseline → compute score → render.**
 ## 6. Packaging & tech facts
 
 - `pyproject.toml`, setuptools build backend; console entry point
-  `contextlint = contextlint.cli:main`; also runnable as `python -m contextlint`.
+  `contextdoctor = contextdoctor.cli:main`; also runnable as `python -m contextdoctor`.
 - Ships `py.typed` (PEP 561) — fully type-hinted.
 - Runtime deps: `[]`. Optional extras: `pdf` (`pypdf>=4`), `dev`
   (`pytest`, `pytest-cov`, `ruff`).
@@ -280,7 +280,7 @@ pragmas/select/severity/baseline → compute score → render.**
   risky, and mixed-format corpora; checked **dark + light** themes and
   **desktop + mobile** responsive layouts.
 - **Playground verified end-to-end in WebAssembly**: built a wheel, served it,
-  Pyodide booted, `import contextlint` succeeded, and an in-browser analysis
+  Pyodide booted, `import contextdoctor` succeeded, and an in-browser analysis
   produced score 76/C with the expected rules and **redaction intact**. A
   narrow-viewport layout bug (report iframe collapsing to 152px) was found and
   fixed (now 86vh / ~608px) and re-verified from source.
@@ -313,7 +313,7 @@ workflow** (`.github/workflows/release.yml`, OIDC Trusted Publishing) is include
 see `RELEASING.md` for the step-by-step.
 
 Still pending until the first public release: the package is **not on PyPI yet**,
-so `pip install contextlint`, the GitHub Action reference, the pre-commit `rev`,
+so `pip install contextdoctor`, the GitHub Action reference, the pre-commit `rev`,
 and the playground's in-browser install only work **after** `v0.1.0` is published
 and the repo is public.
 
@@ -331,7 +331,7 @@ pip install -e ".[dev]"
 python - <<'PY'
 import ast, pathlib
 bad=[]
-for f in pathlib.Path("contextlint").rglob("*.py"):
+for f in pathlib.Path("contextdoctor").rglob("*.py"):
     for n in ast.walk(ast.parse(f.read_text(encoding="utf-8"))):
         if isinstance(n,(ast.Import,ast.ImportFrom)):
             names=[a.name for a in n.names] if isinstance(n,ast.Import) else [n.module or ""]
@@ -346,32 +346,32 @@ PY
 python -c "import tomllib; print('deps =', tomllib.load(open('pyproject.toml','rb'))['project']['dependencies'])"
 
 # Tests + coverage (expect 115 passed, ~93%)
-pytest --cov=contextlint -q
+pytest --cov=contextdoctor -q
 ruff check . && ruff format --check .
 
 # The 10 rules
-contextlint rules
+contextdoctor rules
 
 # All output formats on the demo corpora
-contextlint analyze ./examples/messy_docs                       # terminal + health score
-contextlint analyze ./examples/messy_docs --format json
-contextlint analyze ./examples/messy_docs --format html   -o report.html
-contextlint analyze ./examples/messy_docs --format sarif  -o results.sarif
-contextlint analyze ./examples/risky_docs --format json          # CTX007/008/009, values redacted
-contextlint analyze ./examples/mixed_formats                     # html + csv + jsonl parsers
-contextlint analyze ./examples/pragma_demo                       # CTX007 suppressed by inline pragma
+contextdoctor analyze ./examples/messy_docs                       # terminal + health score
+contextdoctor analyze ./examples/messy_docs --format json
+contextdoctor analyze ./examples/messy_docs --format html   -o report.html
+contextdoctor analyze ./examples/messy_docs --format sarif  -o results.sarif
+contextdoctor analyze ./examples/risky_docs --format json          # CTX007/008/009, values redacted
+contextdoctor analyze ./examples/mixed_formats                     # html + csv + jsonl parsers
+contextdoctor analyze ./examples/pragma_demo                       # CTX007 suppressed by inline pragma
 
 # Compare, baseline, plugin
-contextlint compare ./examples/messy_docs ./examples/clean_docs
-contextlint baseline ./examples/messy_docs -o bl.json
-contextlint analyze ./examples/messy_docs --baseline bl.json     # 0 new findings
-contextlint analyze ./examples/messy_docs \
-  --plugin examples/plugin/contextlint_placeholder_plugin.py     # custom rule PLH001
+contextdoctor compare ./examples/messy_docs ./examples/clean_docs
+contextdoctor baseline ./examples/messy_docs -o bl.json
+contextdoctor analyze ./examples/messy_docs --baseline bl.json     # 0 new findings
+contextdoctor analyze ./examples/messy_docs \
+  --plugin examples/plugin/contextdoctor_placeholder_plugin.py     # custom rule PLH001
 
 # Confirm no raw secret leaks in any format
 python - <<'PY'
-from contextlint import analyze_chunks
-from contextlint.reports import render_json, render_html, render_sarif, render_markdown
+from contextdoctor import analyze_chunks
+from contextdoctor.reports import render_json, render_html, render_sarif, render_markdown
 r = analyze_chunks(["OPENAI_API_KEY=sk-LEAKTESTABCDEFGHIJKLMNOP1234567890"])
 for f in (render_json, render_html, render_sarif, render_markdown):
     assert "sk-LEAKTESTABCDEFGHIJKLMNOP1234567890" not in f(r)
@@ -387,5 +387,5 @@ Expected demo scores (default config): `clean_docs` 100/A+, `messy_docs` 69/D,
 
 ---
 
-*This document is exhaustive as of ContextLint v0.1.0. If any statement here does
+*This document is exhaustive as of ContextDoctor v0.1.0. If any statement here does
 not match the code in this repository, treat the code as the source of truth.*

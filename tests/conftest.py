@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from contextlint.config import Config
+from contextdoctor.config import Config
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 EXAMPLES = REPO_ROOT / "examples"
