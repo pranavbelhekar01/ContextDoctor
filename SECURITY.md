@@ -8,7 +8,7 @@ Instead, report privately via one of:
 
 - GitHub's [private vulnerability reporting](https://github.com/pranavbelhekar01/ContextDoctor/security/advisories/new)
   (Security → Report a vulnerability), or
-- email **hello@lytyr.ai** with the details.
+- email **pranavbelhekar2002@gmail.com** with the details.
 
 Please include: a description, reproduction steps, affected version, and impact.
 We'll acknowledge your report as quickly as we can and keep you updated on the fix.
