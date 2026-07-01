@@ -2,6 +2,7 @@
 
 from contextlint.analyzers.base import AnalysisContext, Analyzer
 from contextlint.analyzers.chunk_stats import ChunkStatsAnalyzer
+from contextlint.analyzers.content_quality import ContentQualityAnalyzer
 from contextlint.analyzers.duplicates import DuplicateAnalyzer
 from contextlint.analyzers.fragmentation import FragmentationAnalyzer
 from contextlint.analyzers.headings import HeadingAnalyzer
@@ -13,6 +14,7 @@ DEFAULT_ANALYZERS: list[type[Analyzer]] = [
     DuplicateAnalyzer,
     TableAnalyzer,
     HeadingAnalyzer,
+    ContentQualityAnalyzer,
     FragmentationAnalyzer,
 ]
 
@@ -21,6 +23,7 @@ __all__ = [
     "AnalysisContext",
     "Analyzer",
     "ChunkStatsAnalyzer",
+    "ContentQualityAnalyzer",
     "DuplicateAnalyzer",
     "FragmentationAnalyzer",
     "HeadingAnalyzer",

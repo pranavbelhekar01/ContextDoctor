@@ -98,10 +98,88 @@ _RULE_LIST: list[Rule] = [
         ),
         experimental=True,
     ),
+    Rule(
+        id="CTX007",
+        name="secret-detected",
+        category="content-quality",
+        default_severity=Severity.ERROR,
+        description="A credential or API key appears to be embedded in the content.",
+        recommendation=(
+            "Never index secrets. API keys, tokens, and private keys embedded in your corpus "
+            "will be stored in your vector database and can be surfaced verbatim to users at "
+            "retrieval time. Remove the secret from the source, rotate it, and re-index."
+        ),
+    ),
+    Rule(
+        id="CTX008",
+        name="pii-detected",
+        category="content-quality",
+        default_severity=Severity.WARNING,
+        description="Personally identifiable information (PII) was detected in the content.",
+        recommendation=(
+            "Review and redact PII before indexing. Emails, phone numbers, and government or "
+            "financial identifiers embedded in chunks can leak to users through retrieval and "
+            "create compliance risk. Mask or remove PII, or gate the affected documents."
+        ),
+    ),
+    Rule(
+        id="CTX009",
+        name="encoding-artifacts",
+        category="content-quality",
+        default_severity=Severity.WARNING,
+        description="Mojibake or control characters suggest a broken text-extraction step.",
+        recommendation=(
+            "Fix the extraction/encoding upstream. Replacement characters (�), mojibake "
+            "like 'Ã©' or 'â€™', and stray control characters degrade embeddings and make "
+            "retrieved text unreadable. Re-extract with the correct encoding (usually UTF-8)."
+        ),
+    ),
+    Rule(
+        id="CTX010",
+        name="exceeds-embedding-limit",
+        category="chunk-stats",
+        default_severity=Severity.WARNING,
+        description="A chunk likely exceeds the embedding model's token limit.",
+        recommendation=(
+            "Shrink chunks to fit your embedding model. Many popular embedding models (e5, "
+            "bge, MiniLM, and others) silently truncate input beyond ~512 tokens, so the tail "
+            "of an oversized chunk is never embedded and becomes unsearchable. Reduce chunk "
+            "size or set 'embedding_token_limit' to match your model."
+        ),
+    ),
 ]
 
 RULES: dict[str, Rule] = {rule.id: rule for rule in _RULE_LIST}
 
+#: Rule ids shipped by ContextLint itself (used to protect them from plugins).
+BUILTIN_RULE_IDS = frozenset(RULES)
+
+
+def register_rule(rule: Rule, *, override: bool = False) -> None:
+    """Register a rule (e.g. from a plugin).
+
+    Built-in rules are never silently overwritten: a plugin trying to redefine a
+    ``CTX*`` id is ignored unless ``override=True`` is passed explicitly.
+    """
+    if rule.id in RULES and not override:
+        return
+    RULES[rule.id] = rule
+
 
 def get_rule(rule_id: str) -> Rule:
-    return RULES[rule_id]
+    """Return rule metadata, synthesising a placeholder for unknown ids.
+
+    This keeps every renderer robust even if a plugin emits a finding for a rule
+    it forgot to register.
+    """
+    rule = RULES.get(rule_id)
+    if rule is not None:
+        return rule
+    return Rule(
+        id=rule_id,
+        name=rule_id.lower().replace("_", "-"),
+        category="plugin",
+        default_severity=Severity.WARNING,
+        description="Custom rule.",
+        recommendation="See the plugin that defines this rule.",
+    )

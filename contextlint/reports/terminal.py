@@ -72,14 +72,29 @@ def _header(report: Report, s: Style, out: list[str], g: dict) -> None:
     out.append("")
 
 
+def _score_color(score: int, s: Style, text: str) -> str:
+    if score >= 80:
+        return s.green(text)
+    if score >= 60:
+        return s.yellow(text)
+    return s.red(text)
+
+
 def _summary(report: Report, s: Style, out: list[str], g: dict) -> None:
+    score = report.health_score
+    gauge = _gauge(score / 100.0, s, g, width=24)
+    big = _score_color(score, s, s.bold(f"{score}/100  {report.health_grade}"))
+    out.append("  " + s.bold("Context Health Score"))
+    out.append(f"    {big}  {gauge}  " + s.gray(report.health_label))
+    out.append("")
+
     counts = report.counts_by_severity()
     parts = [
         s.red(f"{counts['error']} error"),
         s.yellow(f"{counts['warning']} warning"),
         s.cyan(f"{counts['info']} info"),
     ]
-    out.append("  " + s.bold("Summary  ") + "  ".join(parts))
+    out.append("  " + s.bold("Issues  ") + "  ".join(parts))
     out.append("")
 
 

@@ -7,11 +7,13 @@ ContextLint inspects your documents, chunks, and knowledge bases and flags the
 structural, chunking, and context-quality problems that quietly wreck retrieval
 quality — **before you ever call an LLM.**
 
+- 🩺 **One braggable number.** A **Context Health Score** (0–100 + A–F grade), Lighthouse-style, with a README badge.
 - 🔌 **Fully offline.** No API keys. No cloud. No OpenAI / Anthropic / Gemini calls. No model downloads.
 - ⚡ **Fast & deterministic.** Pure static analysis. Same input → same report, every time.
 - 📦 **Zero runtime dependencies.** Just Python 3.11+ and the standard library.
-- 🧰 **Opinionated but extensible.** A small set of sharp rules (CTX001–CTX006) with actionable fixes.
-- 📊 **Multiple outputs.** A polished terminal report, plus JSON and Markdown for CI and sharing.
+- 🧰 **Opinionated but extensible.** Ten sharp rules (CTX001–CTX010) with actionable fixes — plus a plugin API for your own.
+- 📊 **Six output formats.** Terminal, JSON, Markdown, self-contained **HTML**, **SARIF** (GitHub code scanning), and a **badge**.
+- 🔗 **Meets you where you are.** GitHub Action, pre-commit hook, and one-line LangChain / LlamaIndex integration.
 
 > **Why does this exist?** Most "my RAG is bad" problems are not model problems —
 > they're *context* problems: chunks that are too big or too small, duplicated
@@ -19,6 +21,33 @@ quality — **before you ever call an LLM.**
 > boundaries, and related facts scattered so far apart that no retriever can
 > reassemble them. ContextLint helps you answer **"why is my RAG system
 > performing poorly?"** *statically*, in seconds, for free.
+
+### Where it fits
+
+RAG evaluation tools like **RAGAS, TruLens, DeepEval, and Phoenix** are runtime,
+LLM-as-judge, *post-retrieval* — they need a running pipeline, test queries, and
+API calls, and they measure the *answer*. None of them check whether your
+**knowledge base was worth retrieving from in the first place.** ContextLint owns
+that missing **pre-retrieval, pre-index** layer. It's complementary: **lint with
+ContextLint before you index, evaluate with RAGAS/DeepEval after you answer.**
+
+---
+
+## The Context Health Score
+
+Every run produces a single 0–100 score with an A–F grade — easy to track over
+time, gate in CI, and show off:
+
+```text
+  Context Health Score
+    69/100  D  █████████████████░░░░░░░  poor
+```
+
+Drop a live badge in your README (`--format badge` prints the snippet):
+
+```markdown
+![Context Health](https://img.shields.io/badge/context%20health-92%2F100%20A-brightgreen)
+```
 
 ---
 
@@ -94,6 +123,10 @@ chunk exports, and you get a report like this:
 | **CTX004** | `broken-table` | error | Markdown tables split across a chunk boundary, losing their header row. |
 | **CTX005** | `heading-fragmentation` | warning | A single section spanning too many chunks — a signal to use parent-child retrieval. |
 | **CTX006** | `high-context-fragmentation` | warning · **experimental** | High **Context Fragmentation Index** (CFI) — related information scattered across distant chunks. |
+| **CTX007** | `secret-detected` | error | API keys, tokens, or private keys embedded in the corpus — you're about to index a secret into your vector DB. |
+| **CTX008** | `pii-detected` | warning | Emails, phone numbers, SSNs, or card numbers in the content (values are redacted, never echoed). |
+| **CTX009** | `encoding-artifacts` | warning | Mojibake (`Ã©`, `â€™`), replacement chars (`�`), or control characters from a broken extraction step. |
+| **CTX010** | `exceeds-embedding-limit` | warning | Chunks likely over your embedding model's token limit — the tail is silently truncated and never embedded. |
 
 Every finding includes a **severity**, a **description**, a concrete
 **recommendation**, and **file/chunk references** wherever possible.
@@ -163,10 +196,35 @@ Recognised text keys: `text`, `content`, `chunk`, `page_content`, `body`,
 ## Output formats
 
 ```bash
-contextlint analyze ./docs                              # rich terminal report (default)
-contextlint analyze ./docs --format json                # machine-readable JSON
-contextlint analyze ./docs --format markdown            # shareable Markdown
+contextlint analyze ./docs                          # rich terminal report (default)
+contextlint analyze ./docs --format json            # machine-readable JSON
 contextlint analyze ./docs --format markdown -o report.md
+contextlint analyze ./docs --format html -o report.html   # self-contained visual report
+contextlint analyze ./docs --format sarif -o results.sarif  # GitHub code scanning
+contextlint analyze ./docs --format badge           # shields.io endpoint JSON + snippet
+```
+
+The **HTML report** is a single self-contained file (inline CSS + SVG, no JS, no
+network) — open it, screenshot the score card, share it.
+
+### Compare two chunking strategies
+
+Answer *"is recursive or semantic chunking better for my corpus?"* — statically,
+no LLM:
+
+```bash
+contextlint compare recursive_export.json semantic_export.json
+```
+
+```text
+  ContextLint compare
+    metric               before       after         Δ
+    ──────────────────────────────────────────────────
+    health score             71          88       +17
+    findings                  6           2        -4
+    duplicate %            9.10        1.20     -7.90
+    CFI                    0.41        0.22     -0.19
+  ✔ 'after' is healthier.
 ```
 
 ### CI usage
@@ -178,10 +236,35 @@ contextlint analyze ./docs --fail-on error     # exit 1 on any error-level findi
 contextlint analyze ./docs --fail-on warning   # exit 1 on any warning or worse
 ```
 
+**GitHub Action** (findings appear inline on the PR via SARIF):
+
 ```yaml
 # .github/workflows/context.yml
-- run: pip install contextlint
-- run: contextlint analyze ./knowledge_base --fail-on error
+name: ContextLint
+on: [pull_request]
+jobs:
+  contextlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: contextlint/contextlint@v0.1        # composite action (action.yml)
+        with:
+          path: ./knowledge_base
+          fail-on: error
+      - uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: contextlint.sarif
+```
+
+**pre-commit** (`.pre-commit-hooks.yaml` is shipped):
+
+```yaml
+# .pre-commit-config.yaml
+repos:
+  - repo: https://github.com/contextlint/contextlint
+    rev: v0.1.0
+    hooks:
+      - id: contextlint
 ```
 
 ---
@@ -233,6 +316,10 @@ contextlint analyze ./docs --chunk-size 800 --max-chunk-chars 1500 --cfi-thresho
 | `max_chunks_per_heading` | `5` | CTX005 threshold. |
 | `min_entity_freq` | `2` | Min distinct chunks an entity needs for CFI. |
 | `cfi_warning_threshold` | `0.6` | CTX006 threshold. |
+| `embedding_token_limit` | `512` | CTX010 threshold — set to your embedding model's context. |
+| `detect_secrets` / `detect_pii` / `detect_encoding_artifacts` | `true` | Toggle CTX007 / CTX008 / CTX009. |
+| `select` / `ignore` | `[]` | Only-run / skip rule ids (also `--select` / `--ignore`). |
+| `severity` | `{}` | Per-rule severity override, e.g. `{"CTX006": "info"}`. |
 
 ---
 
@@ -245,40 +332,119 @@ from contextlint import analyze_path, Config
 
 report = analyze_path("./docs", Config(max_chunk_chars=1500))
 
-print(report.total_chunks, "chunks")
-print(report.counts_by_severity())        # {"info": 0, "warning": 4, "error": 1}
+print(report.health_score, report.health_grade)   # 82 B
+print(report.counts_by_severity())                 # {"info": 0, "warning": 4, "error": 1}
 for f in report.findings:
     print(f.rule_id, f.severity.value, f.message)
 
-# Metrics per analyzer, including the experimental CFI:
-print(report.metrics["fragmentation"]["cfi"])
+print(report.metrics["fragmentation"]["cfi"])      # experimental CFI
 
-# Serialise:
-from contextlint.reports import render_json, render_markdown
-open("report.md", "w").write(render_markdown(report))
+from contextlint.reports import render_html, render_json
+open("report.html", "w").write(render_html(report))
 ```
 
+### Lint the chunks your pipeline actually produced
+
+`analyze_chunks()` is a framework-agnostic bridge — hand it the exact chunks your
+splitter emitted, before you embed them:
+
+```python
+from contextlint import analyze_chunks
+
+# LangChain
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+docs = RecursiveCharacterTextSplitter(chunk_size=800).split_documents(raw_docs)
+report = analyze_chunks([d.page_content for d in docs])
+
+# LlamaIndex
+nodes = SentenceSplitter(chunk_size=512).get_nodes_from_documents(documents)
+report = analyze_chunks([n.get_content() for n in nodes])
+
+if report.health_score < 80:
+    raise SystemExit(f"Context health too low: {report.health_score}/100")
+```
+
+This is the assertion you can put in your ingestion pipeline's tests: **fail the
+build if your chunking regresses.**
+
 ---
+
+## Custom rules & plugins
+
+ContextLint is extensible. A plugin is just an `Analyzer` subclass that declares
+the rules it emits — and those rules then flow through **everything**: the health
+score, all report formats, SARIF, `contextlint rules`, and `--select` /
+`--ignore`, exactly like the built-in `CTX*` rules.
+
+The lowest-friction path is a single local file:
+
+```python
+# my_rules.py
+from contextlint.analyzers import AnalysisContext, Analyzer
+from contextlint.models import AnalyzerResult, Location, Severity
+from contextlint.rules import Rule
+
+class TodoAnalyzer(Analyzer):
+    name = "todo"
+    provides_rules = [Rule(id="MYP001", name="unfinished-content", category="custom",
+                           default_severity=Severity.WARNING,
+                           description="Placeholder text found.",
+                           recommendation="Finish or remove it before indexing.")]
+
+    def analyze(self, ctx: AnalysisContext) -> AnalyzerResult:
+        findings = [
+            self._finding("MYP001", "TODO marker in chunk",
+                          locations=[Location(file=c.source_file, chunk_id=c.id)])
+            for c in ctx.chunks if "TODO" in c.text
+        ]
+        return self._result(findings=findings)
+```
+
+```bash
+contextlint analyze ./docs --plugin ./my_rules.py
+```
+
+Three ways to load, in increasing order of packaging effort:
+
+| How | Spec |
+| --- | --- |
+| Local `.py` file | `--plugin ./my_rules.py` or `{"plugins": ["./my_rules.py"]}` |
+| Importable module | `--plugin my_pkg.rules` or `my_pkg.rules:TodoAnalyzer` |
+| Published package (auto-discovered) | entry point `contextlint.analyzers` in `pyproject.toml` |
+
+```toml
+# a distributable plugin package advertises itself; no config needed by users
+[project.entry-points."contextlint.analyzers"]
+my-rules = "contextlint_plugin_myrules:TodoAnalyzer"
+```
+
+A complete, working example lives in
+[`examples/plugin/`](examples/plugin) (rule `PLH001`, flagging unfinished
+content). Plugin loading is best-effort and offline — a broken plugin warns and
+is skipped, and built-in `CTX*` ids can't be silently overridden.
 
 ## How it works
 
 ```
 contextlint/
-├── cli.py            # argparse CLI: analyze / rules
+├── cli.py            # argparse CLI: analyze / compare / rules
 ├── config.py         # thresholds + config discovery (.json / pyproject.toml)
-├── engine.py         # discover → chunk → analyze → assemble Report
+├── engine.py         # discover → chunk → analyze → filter → score → Report
+├── scoring.py        # the Context Health Score
+├── plugins.py        # load custom analyzers/rules (files, modules, entry points)
 ├── models.py         # Chunk, Document, Finding, Report, Severity
 ├── chunking/         # structure-aware chunker (paragraphs, tables, code fences)
-├── parsers/          # file discovery + markdown/text/json loaders
+├── parsers/          # file discovery + markdown/text/json loaders + analyze_chunks
 ├── analyzers/        # one module per concern:
-│   ├── chunk_stats.py    # CTX001 / CTX002 + size distribution + overlap
-│   ├── duplicates.py     # CTX003 (hash + Jaccard/MinHash)
-│   ├── tables.py         # CTX004
-│   ├── headings.py       # CTX005
-│   └── fragmentation.py  # CTX006 — the experimental CFI
+│   ├── chunk_stats.py      # CTX001 / CTX002 / CTX010 + distribution + overlap
+│   ├── duplicates.py       # CTX003 (hash + Jaccard/MinHash)
+│   ├── tables.py           # CTX004
+│   ├── headings.py         # CTX005
+│   ├── content_quality.py  # CTX007 / CTX008 / CTX009 (secrets, PII, encoding)
+│   └── fragmentation.py    # CTX006 — the experimental CFI
 ├── rules/            # rule catalogue (id, severity, description, recommendation)
-├── reports/          # terminal (ANSI) / json / markdown renderers
-└── utils/            # text, hashing (MinHash), lightweight NLP, ANSI
+├── reports/          # terminal / json / markdown / html / sarif / badge
+└── utils/            # text, hashing (MinHash), NLP, ANSI, secret/PII patterns
 ```
 
 The pipeline is a straight line: **discover files → build chunks → run each
@@ -314,12 +480,14 @@ and Windows in CI.
 
 The [`examples/`](examples/) directory ships datasets you can run immediately:
 
-- [`examples/clean_docs/`](examples/clean_docs) — well-structured docs; reports no issues.
-- [`examples/messy_docs/`](examples/messy_docs) — triggers CTX001–CTX005 (oversized/tiny chunks, duplicates, a broken table, heading fragmentation).
+- [`examples/clean_docs/`](examples/clean_docs) — well-structured docs; scores 100/100.
+- [`examples/messy_docs/`](examples/messy_docs) — triggers CTX001–CTX005 and CTX010 (oversized/tiny chunks, duplicates, a broken table, heading fragmentation, embedding-limit).
+- [`examples/risky_docs/`](examples/risky_docs) — a support log that leaked secrets, PII, and mojibake into the KB (CTX007–CTX009). Values are always redacted.
 - [`examples/fragmented_kb/`](examples/fragmented_kb) — a scattered knowledge base that triggers the experimental CFI (CTX006), with its own `.contextlint.json`.
 
 ```bash
 contextlint analyze ./examples/messy_docs
+contextlint analyze ./examples/risky_docs
 contextlint analyze ./examples/fragmented_kb
 ```
 
@@ -329,11 +497,11 @@ contextlint analyze ./examples/fragmented_kb
 
 ContextLint is at **v0.1**. Ideas on the table:
 
-- More rules: encoding artefacts, boilerplate/nav-chrome detection, orphaned references, language mixing.
-- Pluggable, user-defined rules.
-- Smarter chunkers and per-format parsers (HTML, PDF text dumps, CSV).
+- More parsers: HTML, PDF text dumps, CSV/TSV, JSONL, `.rst`.
+- More rules: boilerplate/nav-chrome detection, orphaned references, language mixing.
 - A refined, better-validated CFI (the current one is intentionally experimental).
-- Baseline files and inline ignores (`contextlint: disable=CTX003`).
+- Baseline files and inline ignores (`contextlint: disable=CTX003`) for adopting in existing repos.
+- A browser (WASM) playground so anyone can paste chunks and get a score with zero install.
 
 Contributions and issues welcome.
 

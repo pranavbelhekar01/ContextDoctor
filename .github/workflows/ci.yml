@@ -47,5 +47,9 @@ jobs:
           contextlint --version
           contextlint rules
           contextlint analyze ./examples/messy_docs --format json > /dev/null
+          contextlint analyze ./examples/messy_docs --format sarif -o results.sarif
+          contextlint analyze ./examples/messy_docs --format html -o report.html
+          contextlint analyze ./examples/risky_docs --format badge > /dev/null
+          contextlint compare ./examples/messy_docs ./examples/clean_docs --no-color
           contextlint analyze ./examples/clean_docs
         shell: bash

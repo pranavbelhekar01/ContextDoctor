@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
+from typing import ClassVar
 
 from contextlint.config import Config
 from contextlint.models import AnalyzerResult, Chunk, Document, Finding, Location, Severity
@@ -25,10 +26,18 @@ class AnalysisContext:
 
 
 class Analyzer(ABC):
-    """Base class for all analyzers."""
+    """Base class for all analyzers.
+
+    Plugins subclass this and may declare the rules they emit via
+    :attr:`provides_rules`; the plugin loader registers them automatically so
+    they appear in reports, SARIF, ``contextlint rules``, and ``--select`` /
+    ``--ignore``.
+    """
 
     name: str = "analyzer"
     title: str = "Analyzer"
+    #: Rule metadata this analyzer emits (registered on plugin load).
+    provides_rules: ClassVar[list] = []
 
     @abstractmethod
     def analyze(self, ctx: AnalysisContext) -> AnalyzerResult:

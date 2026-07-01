@@ -38,6 +38,11 @@ def report_to_dict(report: Report) -> dict:
         "version": _version(),
         "root": report.root,
         "generated_at": report.generated_at,
+        "health": {
+            "score": report.health_score,
+            "grade": report.health_grade,
+            "label": report.health_label,
+        },
         "summary": {
             "files_analyzed": report.files_analyzed,
             "total_chunks": report.total_chunks,

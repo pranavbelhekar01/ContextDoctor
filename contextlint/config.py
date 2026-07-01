@@ -8,7 +8,7 @@ loaded from a JSON file (``--config``) or a ``[tool.contextlint]`` table in
 from __future__ import annotations
 
 import json
-from dataclasses import asdict, dataclass, fields
+from dataclasses import asdict, dataclass, field, fields
 from pathlib import Path
 from typing import Any
 
@@ -21,9 +21,15 @@ class Config:
     chunk_size: int = 1200  # target characters per chunk
     chunk_overlap: int = 120  # characters of overlap carried between chunks
 
-    # --- Chunk statistics (CTX001 / CTX002) ---
+    # --- Chunk statistics (CTX001 / CTX002 / CTX010) ---
     max_chunk_chars: int = 2000  # chunks larger than this are "too large"
     min_chunk_chars: int = 200  # non-trivial chunks smaller than this are "too small"
+    embedding_token_limit: int = 512  # CTX010: many embedding models truncate beyond this
+
+    # --- Content quality (CTX007 / CTX008 / CTX009) ---
+    detect_secrets: bool = True  # scan for embedded credentials / API keys
+    detect_pii: bool = True  # scan for emails, phone numbers, SSNs, card numbers
+    detect_encoding_artifacts: bool = True  # scan for mojibake / control chars
 
     # --- Duplicate detection (CTX003) ---
     shingle_size: int = 5  # word-shingle length for near-duplicate comparison
@@ -37,6 +43,14 @@ class Config:
     min_entity_freq: int = 2  # entity must appear in at least this many chunks
     cfi_warning_threshold: float = 0.6  # CFI at/above this triggers a warning
     max_entities_reported: int = 8  # top fragmented entities to surface
+
+    # --- Rule selection & severity ---
+    select: tuple[str, ...] = ()  # if non-empty, ONLY these rule ids run
+    ignore: tuple[str, ...] = ()  # these rule ids are dropped
+    severity: dict[str, str] = field(default_factory=dict)  # rule_id -> severity override
+
+    # --- Plugins (custom analyzers/rules; module specs or local .py paths) ---
+    plugins: tuple[str, ...] = ()
 
     # --- File discovery ---
     extensions: tuple[str, ...] = (".md", ".markdown", ".txt", ".json")
@@ -52,11 +66,12 @@ class Config:
     def from_dict(cls, data: dict[str, Any]) -> Config:
         """Build a Config from a dict, ignoring unknown keys."""
         allowed = cls._field_names()
+        tuple_fields = {"extensions", "select", "ignore", "plugins"}
         clean: dict[str, Any] = {}
         for key, value in data.items():
             if key not in allowed:
                 continue
-            if key == "extensions" and isinstance(value, list):
+            if key in tuple_fields and isinstance(value, list):
                 value = tuple(value)
             clean[key] = value
         return cls(**clean)

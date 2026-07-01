@@ -10,6 +10,22 @@ from contextlint.models import AnalyzerResult, Location
 from contextlint.utils.text import shingles
 
 
+def _histogram(sorted_sizes: list[int], bins: int = 12) -> dict:
+    """Bucket chunk sizes into ``bins`` equal-width buckets for visualisation."""
+    if not sorted_sizes:
+        return {"edges": [], "counts": []}
+    lo, hi = sorted_sizes[0], sorted_sizes[-1]
+    if hi == lo:
+        return {"edges": [lo, hi], "counts": [len(sorted_sizes)]}
+    width = (hi - lo) / bins
+    counts = [0] * bins
+    for v in sorted_sizes:
+        idx = min(int((v - lo) / width), bins - 1)
+        counts[idx] += 1
+    edges = [round(lo + i * width) for i in range(bins + 1)]
+    return {"edges": edges, "counts": counts}
+
+
 def _percentile(sorted_values: list[int], pct: float) -> float:
     """Linear-interpolation percentile (pct in [0, 100])."""
     if not sorted_values:
@@ -39,6 +55,7 @@ class ChunkStatsAnalyzer(Analyzer):
             "count": len(chunks),
             "char": self._distribution(char_sizes),
             "token": self._distribution(token_sizes),
+            "histogram": _histogram(char_sizes),
             "overlap_pct": round(self._overlap_pct(ctx), 2),
         }
 
@@ -95,6 +112,29 @@ class ChunkStatsAnalyzer(Analyzer):
                         "count": len(small),
                         "smallest": smallest,
                     },
+                )
+            )
+
+        over_limit = [c for c in chunks if c.token_estimate > cfg.embedding_token_limit]
+        if over_limit:
+            biggest = max(c.token_estimate for c in over_limit)
+            metrics["over_embedding_limit_count"] = len(over_limit)
+            findings.append(
+                self._finding(
+                    "CTX010",
+                    f"{len(over_limit)} chunk(s) likely exceed the embedding token limit of "
+                    f"{cfg.embedding_token_limit} tokens (largest ~{biggest}). The tail of "
+                    f"these chunks may never be embedded.",
+                    locations=[
+                        Location(
+                            file=c.source_file,
+                            chunk_id=c.id,
+                            line=c.start_line,
+                            detail=f"~{c.token_estimate} tokens",
+                        )
+                        for c in over_limit[:20]
+                    ],
+                    data={"threshold": cfg.embedding_token_limit, "count": len(over_limit)},
                 )
             )
 

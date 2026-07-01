@@ -125,3 +125,94 @@ def test_cli_no_command_prints_help(capsys):
     out = capsys.readouterr().out
     assert rc == 0
     assert "usage" in out.lower()
+
+
+def test_cli_format_html(examples_dir, capsys):
+    rc = main(["analyze", str(examples_dir / "messy_docs"), "--format", "html"])
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert "<!doctype html>" in out.lower()
+
+
+def test_cli_format_sarif(examples_dir, capsys):
+    rc = main(["analyze", str(examples_dir / "messy_docs"), "--format", "sarif"])
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert json.loads(out)["version"] == "2.1.0"
+
+
+def test_cli_format_badge(examples_dir, capsys):
+    rc = main(["analyze", str(examples_dir / "clean_docs"), "--format", "badge"])
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert json.loads(out)["schemaVersion"] == 1
+
+
+def test_cli_ignore_flag(examples_dir, capsys):
+    rc = main(
+        [
+            "analyze",
+            str(examples_dir / "messy_docs"),
+            "--format",
+            "json",
+            "--ignore",
+            "CTX003,CTX005",
+        ]
+    )
+    payload = json.loads(capsys.readouterr().out)
+    assert rc == 0
+    ids = {f["rule"] for f in payload["findings"]}
+    assert "CTX003" not in ids and "CTX005" not in ids
+
+
+def test_cli_multiple_paths(examples_dir, capsys):
+    rc = main(
+        [
+            "analyze",
+            str(examples_dir / "clean_docs"),
+            str(examples_dir / "messy_docs"),
+            "--format",
+            "json",
+        ]
+    )
+    payload = json.loads(capsys.readouterr().out)
+    assert rc == 0
+    assert payload["summary"]["files_analyzed"] >= 5
+
+
+def test_cli_compare_terminal(examples_dir, capsys):
+    rc = main(
+        [
+            "compare",
+            str(examples_dir / "clean_docs"),
+            str(examples_dir / "messy_docs"),
+            "--no-color",
+        ]
+    )
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert "compare" in out.lower()
+    assert "health score" in out.lower()
+
+
+def test_cli_compare_json(examples_dir, capsys):
+    rc = main(
+        [
+            "compare",
+            str(examples_dir / "clean_docs"),
+            str(examples_dir / "messy_docs"),
+            "--format",
+            "json",
+        ]
+    )
+    payload = json.loads(capsys.readouterr().out)
+    assert rc == 0
+    assert "before" in payload and "after" in payload and "delta" in payload
+
+
+def test_cli_risky_docs_flags_secrets(examples_dir, capsys):
+    rc = main(["analyze", str(examples_dir / "risky_docs"), "--format", "json"])
+    payload = json.loads(capsys.readouterr().out)
+    assert rc == 0
+    ids = {f["rule"] for f in payload["findings"]}
+    assert "CTX007" in ids  # secret detected

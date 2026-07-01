@@ -4,6 +4,33 @@ All notable changes to ContextLint are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **Context Health Score** — a single 0–100 score with an A–F grade in every
+  report, plus a `badge` output format (shields.io endpoint JSON + Markdown snippet).
+- New content-quality rules:
+  - **CTX007** — embedded secret / API-key detection (values are always redacted).
+  - **CTX008** — PII detection (emails, phones, SSNs, card numbers via Luhn; redacted).
+  - **CTX009** — encoding-artifact detection (mojibake, replacement chars, control chars).
+  - **CTX010** — chunks exceeding the embedding model's token limit.
+- New output formats: self-contained **HTML** (inline CSS + SVG) and **SARIF 2.1.0**
+  for GitHub code scanning.
+- `contextlint compare <a> <b>` — side-by-side comparison of two corpora / chunking
+  strategies with health-score and metric deltas.
+- Framework-agnostic `analyze_chunks()` API for one-line LangChain / LlamaIndex use,
+  plus `analyze_paths()` for multi-path analysis (the CLI now accepts multiple paths).
+- Rule selection and severity control: `select` / `ignore` config + `--select` /
+  `--ignore` flags, and per-rule `severity` overrides.
+- Integrations: a composite **GitHub Action** (`action.yml`) and a **pre-commit**
+  hook (`.pre-commit-hooks.yaml`).
+- **Plugin system** — add custom analyzers and rules via a local `.py` file, an
+  importable module, or a published package's `contextlint.analyzers` entry point.
+  Plugin rules flow through the score, all reports, SARIF, and `--select`/`--ignore`.
+  Loading is best-effort (a broken plugin warns and is skipped); built-in `CTX*`
+  ids cannot be silently overridden. See `examples/plugin/`.
+
 ## [0.1.0] — 2026-07-01
 
 Initial release. Fully offline static analysis for RAG systems — zero API keys,

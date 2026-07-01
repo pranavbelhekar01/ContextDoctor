@@ -82,6 +82,26 @@ def _make_chunk(
     )
 
 
+def build_chunks_from_texts(texts: list[str], source: str, start_index: int = 0) -> list[Chunk]:
+    """Build pre-chunked :class:`Chunk` objects from raw texts (no re-chunking)."""
+    return [
+        _make_chunk(source=source, global_index=start_index + i, doc_index=i, text=text)
+        for i, text in enumerate(texts)
+    ]
+
+
+def extract_chunk_text(item: object) -> str | None:
+    """Pull chunk text out of a string or a dict with a known text key."""
+    if isinstance(item, str):
+        return item
+    if isinstance(item, dict):
+        for key in _TEXT_KEYS:
+            val = item.get(key)
+            if isinstance(val, str) and val.strip():
+                return val
+    return None
+
+
 def _load_chunked_text(
     raw: str, source: str, kind: str, config: Config, start_index: int
 ) -> Document:
@@ -106,20 +126,9 @@ def _load_chunked_text(
 
 def _extract_json_texts(data: object) -> list[str]:
     """Best-effort extraction of chunk texts from a decoded JSON structure."""
-
-    def from_item(item: object) -> str | None:
-        if isinstance(item, str):
-            return item
-        if isinstance(item, dict):
-            for key in _TEXT_KEYS:
-                val = item.get(key)
-                if isinstance(val, str) and val.strip():
-                    return val
-        return None
-
     # A bare list of chunks (strings or objects).
     if isinstance(data, list):
-        texts = [t for t in (from_item(i) for i in data) if t is not None]
+        texts = [t for t in (extract_chunk_text(i) for i in data) if t is not None]
         if texts:
             return texts
 
@@ -130,7 +139,7 @@ def _extract_json_texts(data: object) -> list[str]:
             if isinstance(container, list):
                 collected: list[str] = []
                 for item in container:
-                    t = from_item(item)
+                    t = extract_chunk_text(item)
                     if t is not None:
                         collected.append(t)
                     elif isinstance(item, dict):
@@ -139,7 +148,7 @@ def _extract_json_texts(data: object) -> list[str]:
                 if collected:
                     return collected
         # Single chunk object.
-        single = from_item(data)
+        single = extract_chunk_text(data)
         if single is not None:
             return [single]
     return []
@@ -148,15 +157,7 @@ def _extract_json_texts(data: object) -> list[str]:
 def _load_json(raw: str, source: str, config: Config, start_index: int) -> Document:
     data = json.loads(raw)
     texts = _extract_json_texts(data)
-    chunks = [
-        _make_chunk(
-            source=source,
-            global_index=start_index + i,
-            doc_index=i,
-            text=text,
-        )
-        for i, text in enumerate(texts)
-    ]
+    chunks = build_chunks_from_texts(texts, source=source, start_index=start_index)
     return Document(path=source, kind="json", raw=raw, chunks=chunks, pre_chunked=True)
 
 

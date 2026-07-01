@@ -22,6 +22,11 @@ def render_markdown(report: Report) -> str:
     lines: list[str] = []
     lines.append("# ContextLint Report")
     lines.append("")
+    lines.append(
+        f"## Context Health Score: {report.health_score}/100 "
+        f"({report.health_grade} — {report.health_label})"
+    )
+    lines.append("")
     lines.append(f"- **Root:** `{report.root}`")
     lines.append(f"- **Generated:** {report.generated_at}")
     lines.append(f"- **Files analyzed:** {report.files_analyzed}")

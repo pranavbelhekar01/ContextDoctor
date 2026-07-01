@@ -112,6 +112,9 @@ class Report:
     generated_at: str
     files_analyzed: int
     total_chunks: int
+    health_score: int = 100
+    health_grade: str = "A"
+    health_label: str = "excellent"
     findings: list[Finding] = field(default_factory=list)
     analyzers: list[AnalyzerResult] = field(default_factory=list)
     metrics: dict = field(default_factory=dict)

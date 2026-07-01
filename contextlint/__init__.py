@@ -10,7 +10,7 @@ from __future__ import annotations
 __version__ = "0.1.0"
 
 from contextlint.config import Config
-from contextlint.engine import analyze_path
+from contextlint.engine import analyze_chunks, analyze_path, analyze_paths
 from contextlint.models import (
     AnalyzerResult,
     Chunk,
@@ -20,6 +20,7 @@ from contextlint.models import (
     Report,
     Severity,
 )
+from contextlint.scoring import compute_health
 
 __all__ = [
     "AnalyzerResult",
@@ -31,5 +32,8 @@ __all__ = [
     "Report",
     "Severity",
     "__version__",
+    "analyze_chunks",
     "analyze_path",
+    "analyze_paths",
+    "compute_health",
 ]

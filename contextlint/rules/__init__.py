@@ -1,5 +1,11 @@
-"""The ContextLint rule catalogue (CTX001–CTX006)."""
+"""The ContextLint rule catalogue (CTX001–CTX010) and plugin registration."""
 
-from contextlint.rules.registry import RULES, Rule, get_rule
+from contextlint.rules.registry import (
+    BUILTIN_RULE_IDS,
+    RULES,
+    Rule,
+    get_rule,
+    register_rule,
+)
 
-__all__ = ["RULES", "Rule", "get_rule"]
+__all__ = ["BUILTIN_RULE_IDS", "RULES", "Rule", "get_rule", "register_rule"]
