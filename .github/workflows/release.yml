@@ -6,7 +6,7 @@ name: Release
 # - Manual "Run workflow"     -> builds and publishes to TestPyPI (a safe dry-run).
 #
 # One-time setup on (Test)PyPI: add a "pending publisher" pointing at
-#   owner: pranavbelhekar01   repo: ContextLint
+#   owner: pranavbelhekar01   repo: ContextDoctor
 #   workflow: release.yml     environment: pypi  (and testpypi)
 # See RELEASING.md for the full checklist.
 
@@ -16,7 +16,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
