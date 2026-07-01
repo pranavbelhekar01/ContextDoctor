@@ -14,6 +14,13 @@ from pathlib import Path
 from contextlint.chunking import chunk_document
 from contextlint.config import Config
 from contextlint.models import Chunk, Document
+from contextlint.parsers.formats import (
+    csv_rows_to_chunks,
+    html_to_text,
+    jsonl_to_texts,
+    pdf_to_text,
+)
+from contextlint.parsers.pragmas import parse_disabled_rules
 from contextlint.utils.text import (
     estimate_tokens,
     line_starts,
@@ -24,6 +31,11 @@ from contextlint.utils.text import (
 _MARKDOWN_EXT = {".md", ".markdown"}
 _TEXT_EXT = {".txt"}
 _JSON_EXT = {".json"}
+_JSONL_EXT = {".jsonl", ".ndjson"}
+_HTML_EXT = {".html", ".htm"}
+_CSV_EXT = {".csv"}
+_TSV_EXT = {".tsv"}
+_PDF_EXT = {".pdf"}
 
 # Keys we probe when a JSON export stores chunk text inside objects.
 _TEXT_KEYS = ("text", "content", "chunk", "page_content", "body", "passage")
@@ -161,6 +173,18 @@ def _load_json(raw: str, source: str, config: Config, start_index: int) -> Docum
     return Document(path=source, kind="json", raw=raw, chunks=chunks, pre_chunked=True)
 
 
+def _load_jsonl(raw: str, source: str, config: Config, start_index: int) -> Document:
+    texts = jsonl_to_texts(raw)
+    chunks = build_chunks_from_texts(texts, source=source, start_index=start_index)
+    return Document(path=source, kind="jsonl", raw=raw, chunks=chunks, pre_chunked=True)
+
+
+def _load_csv(raw: str, source: str, delimiter: str, kind: str, start_index: int) -> Document:
+    texts = csv_rows_to_chunks(raw, delimiter=delimiter)
+    chunks = build_chunks_from_texts(texts, source=source, start_index=start_index)
+    return Document(path=source, kind=kind, raw=raw, chunks=chunks, pre_chunked=True)
+
+
 def load_document(
     path: str | Path,
     display_path: str,
@@ -173,13 +197,33 @@ def load_document(
     indices stay unique across the whole corpus.
     """
     path = Path(path)
-    raw = path.read_text(encoding="utf-8", errors="replace")
     suffix = path.suffix.lower()
+
+    # PDF is read as binary and text-extracted, so handle it before read_text.
+    if suffix in _PDF_EXT:
+        text = pdf_to_text(str(path))
+        doc = _load_chunked_text(text, display_path, "pdf", config, start_index)
+        doc.disabled_rules = parse_disabled_rules(text)
+        return doc
+
+    raw = path.read_text(encoding="utf-8", errors="replace")
     if suffix in _JSON_EXT:
-        return _load_json(raw, display_path, config, start_index)
-    if suffix in _MARKDOWN_EXT:
-        return _load_chunked_text(raw, display_path, "markdown", config, start_index)
-    if suffix in _TEXT_EXT:
-        return _load_chunked_text(raw, display_path, "text", config, start_index)
-    # Unknown extensions are treated as plain text.
-    return _load_chunked_text(raw, display_path, "text", config, start_index)
+        doc = _load_json(raw, display_path, config, start_index)
+    elif suffix in _JSONL_EXT:
+        doc = _load_jsonl(raw, display_path, config, start_index)
+    elif suffix in _HTML_EXT:
+        doc = _load_chunked_text(html_to_text(raw), display_path, "html", config, start_index)
+    elif suffix in _CSV_EXT:
+        doc = _load_csv(raw, display_path, ",", "csv", start_index)
+    elif suffix in _TSV_EXT:
+        doc = _load_csv(raw, display_path, "\t", "tsv", start_index)
+    elif suffix in _MARKDOWN_EXT:
+        doc = _load_chunked_text(raw, display_path, "markdown", config, start_index)
+    elif suffix in _TEXT_EXT:
+        doc = _load_chunked_text(raw, display_path, "text", config, start_index)
+    else:
+        # Unknown extensions are treated as plain text.
+        doc = _load_chunked_text(raw, display_path, "text", config, start_index)
+
+    doc.disabled_rules = parse_disabled_rules(raw)
+    return doc

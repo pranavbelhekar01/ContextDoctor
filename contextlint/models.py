@@ -54,10 +54,13 @@ class Document:
     """A parsed source file plus the chunks derived from it."""
 
     path: str
-    kind: str  # "markdown" | "text" | "json"
+    kind: str  # "markdown" | "text" | "json" | "html" | "csv" | "jsonl"
     raw: str
     chunks: list[Chunk] = field(default_factory=list)
     pre_chunked: bool = False  # True when chunks came from the input (JSON), not our chunker
+    disabled_rules: set[str] = field(
+        default_factory=set
+    )  # from inline `contextlint: disable=` pragmas
 
 
 @dataclass(frozen=True)
@@ -115,6 +118,7 @@ class Report:
     health_score: int = 100
     health_grade: str = "A"
     health_label: str = "excellent"
+    baseline_suppressed: int = 0
     findings: list[Finding] = field(default_factory=list)
     analyzers: list[AnalyzerResult] = field(default_factory=list)
     metrics: dict = field(default_factory=dict)

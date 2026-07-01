@@ -216,3 +216,25 @@ def test_cli_risky_docs_flags_secrets(examples_dir, capsys):
     assert rc == 0
     ids = {f["rule"] for f in payload["findings"]}
     assert "CTX007" in ids  # secret detected
+
+
+def test_cli_baseline_roundtrip(examples_dir, tmp_path, capsys):
+    bl = tmp_path / "baseline.json"
+    rc = main(["baseline", str(examples_dir / "messy_docs"), "-o", str(bl)])
+    assert rc == 0 and bl.exists()
+    capsys.readouterr()
+
+    rc = main(
+        ["analyze", str(examples_dir / "messy_docs"), "--format", "json", "--baseline", str(bl)]
+    )
+    payload = json.loads(capsys.readouterr().out)
+    assert rc == 0
+    assert payload["summary"]["findings"] == 0
+    assert payload["summary"]["baseline_suppressed"] > 0
+
+
+def test_cli_analyze_mixed_formats(examples_dir, capsys):
+    rc = main(["analyze", str(examples_dir / "mixed_formats"), "--format", "json"])
+    payload = json.loads(capsys.readouterr().out)
+    assert rc == 0
+    assert payload["summary"]["files_analyzed"] == 3

@@ -14,6 +14,8 @@ quality — **before you ever call an LLM.**
 - 🧰 **Opinionated but extensible.** Ten sharp rules (CTX001–CTX010) with actionable fixes — plus a plugin API for your own.
 - 📊 **Six output formats.** Terminal, JSON, Markdown, self-contained **HTML**, **SARIF** (GitHub code scanning), and a **badge**.
 - 🔗 **Meets you where you are.** GitHub Action, pre-commit hook, and one-line LangChain / LlamaIndex integration.
+- 📥 **Reads what you have.** Markdown, text, HTML, JSON, JSONL, CSV/TSV, and (optional) PDF.
+- 🌐 **Try it with zero install.** A [browser playground](playground/) runs the whole analyzer in WebAssembly — nothing is uploaded.
 
 > **Why does this exist?** Most "my RAG is bad" problems are not model problems —
 > they're *context* problems: chunks that are too big or too small, duplicated
@@ -172,12 +174,16 @@ contextlint analyze ./examples/fragmented_kb
 
 ## Inputs
 
-ContextLint understands three kinds of input and traverses directories
-recursively (skipping hidden files):
+ContextLint understands many input types and traverses directories recursively
+(skipping hidden files):
 
 - **Markdown** (`.md`, `.markdown`) — chunked by ContextLint's structure-aware chunker.
 - **Plain text** (`.txt`) — chunked the same way.
+- **HTML** (`.html`, `.htm`) — tags/scripts/styles stripped, then chunked.
 - **JSON exports** (`.json`) — read as **pre-existing chunks**, so metrics reflect *your* chunking, not ours.
+- **JSONL / NDJSON** (`.jsonl`, `.ndjson`) — one chunk per line.
+- **CSV / TSV** (`.csv`, `.tsv`) — one chunk per row, rendered as `header: value`.
+- **PDF** (`.pdf`) — *optional*: `pip install "contextlint[pdf]"` (keeps the core dependency-free).
 
 Supported JSON shapes (auto-detected):
 
@@ -369,6 +375,40 @@ build if your chunking regresses.**
 
 ---
 
+## Adopting on an existing corpus
+
+Turning a linter on a large, pre-existing knowledge base usually floods you with
+issues. Two mechanisms make adoption incremental:
+
+**Baseline** — freeze today's findings; fail only on *new* ones:
+
+```bash
+contextlint baseline ./docs                       # writes .contextlint-baseline.json
+contextlint analyze ./docs --baseline .contextlint-baseline.json --fail-on warning
+# -> pre-existing findings are suppressed; only regressions surface (and count against the score)
+```
+
+**Inline disable pragmas** — opt a specific file out of a rule (file-scoped),
+for the legitimate cases (e.g. a doc that *shows* an example API key):
+
+```markdown
+<!-- contextlint: disable=CTX007 -->        # disable one or more rules for this file
+<!-- contextlint: disable=CTX003,CTX008 --> # comma-separated
+<!-- contextlint: disable-all -->           # disable everything for this file
+```
+
+## Playground
+
+Want to try it without installing anything? The
+[browser playground](playground/) runs the entire ContextLint engine in
+WebAssembly (Pyodide) — paste your chunks, get a score and a full report, and
+**nothing is uploaded**. It works because the core has zero dependencies. Deploy
+your own to GitHub Pages with the included workflow, or run it locally:
+
+```bash
+python -m http.server -d playground 8000   # then open http://localhost:8000
+```
+
 ## Custom rules & plugins
 
 ContextLint is extensible. A plugin is just an `Analyzer` subclass that declares
@@ -431,10 +471,11 @@ contextlint/
 ├── config.py         # thresholds + config discovery (.json / pyproject.toml)
 ├── engine.py         # discover → chunk → analyze → filter → score → Report
 ├── scoring.py        # the Context Health Score
+├── baseline.py       # freeze findings; report only new ones
 ├── plugins.py        # load custom analyzers/rules (files, modules, entry points)
 ├── models.py         # Chunk, Document, Finding, Report, Severity
 ├── chunking/         # structure-aware chunker (paragraphs, tables, code fences)
-├── parsers/          # file discovery + markdown/text/json loaders + analyze_chunks
+├── parsers/          # discovery + md/txt/html/json/jsonl/csv/pdf loaders + pragmas
 ├── analyzers/        # one module per concern:
 │   ├── chunk_stats.py      # CTX001 / CTX002 / CTX010 + distribution + overlap
 │   ├── duplicates.py       # CTX003 (hash + Jaccard/MinHash)
@@ -497,11 +538,11 @@ contextlint analyze ./examples/fragmented_kb
 
 ContextLint is at **v0.1**. Ideas on the table:
 
-- More parsers: HTML, PDF text dumps, CSV/TSV, JSONL, `.rst`.
 - More rules: boilerplate/nav-chrome detection, orphaned references, language mixing.
+- More parsers: `.rst`, DOCX, and richer HTML (readability-style main-content extraction).
 - A refined, better-validated CFI (the current one is intentionally experimental).
-- Baseline files and inline ignores (`contextlint: disable=CTX003`) for adopting in existing repos.
-- A browser (WASM) playground so anyone can paste chunks and get a score with zero install.
+- Line-scoped disable pragmas (today's pragmas are file-scoped) and autofix suggestions.
+- A VS Code extension surfacing findings inline as you edit docs.
 
 Contributions and issues welcome.
 

@@ -15,6 +15,7 @@ import sys
 from pathlib import Path
 
 from contextlint import __version__
+from contextlint.baseline import load_baseline, save_baseline
 from contextlint.config import Config
 from contextlint.engine import analyze_paths
 from contextlint.models import Report, Severity
@@ -84,6 +85,11 @@ def build_parser() -> argparse.ArgumentParser:
         metavar="SPEC",
         help="Load a plugin analyzer (module spec or .py path). Repeatable.",
     )
+    analyze.add_argument(
+        "--baseline",
+        metavar="FILE",
+        help="Suppress findings recorded in this baseline; report only new ones.",
+    )
     analyze.add_argument("--no-color", action="store_true", help="Disable ANSI colour output.")
     analyze.add_argument(
         "--quiet", action="store_true", help="Suppress stdout when using --output."
@@ -112,6 +118,16 @@ def build_parser() -> argparse.ArgumentParser:
         "-f", "--format", choices=["terminal", "json"], default="terminal", help="Output format."
     )
     compare.add_argument("--no-color", action="store_true", help="Disable ANSI colour output.")
+
+    baseline = sub.add_parser(
+        "baseline",
+        help="Record current findings to a baseline file so CI only fails on new ones.",
+    )
+    baseline.add_argument("paths", nargs="+", help="Files or directories to baseline.")
+    baseline.add_argument(
+        "-o", "--output", default=".contextlint-baseline.json", help="Baseline file to write."
+    )
+    baseline.add_argument("-c", "--config", help="Config file (.json or pyproject.toml).")
 
     rules = sub.add_parser("rules", help="List all rules (CTX001–CTX010 plus any plugins).")
     rules.add_argument(
@@ -154,7 +170,18 @@ def _cmd_analyze(args: argparse.Namespace) -> int:
         return 2
 
     config = _build_config(args, discover_from=args.paths[0])
-    report = analyze_paths(args.paths, config)
+
+    baseline_set = None
+    if args.baseline:
+        if Path(args.baseline).exists():
+            baseline_set = load_baseline(args.baseline)
+        elif not args.quiet:
+            print(
+                f"contextlint: baseline '{args.baseline}' not found; reporting all findings.",
+                file=sys.stderr,
+            )
+
+    report = analyze_paths(args.paths, config, baseline=baseline_set)
 
     use_color = args.format == "terminal" and not args.no_color and not args.output
     rendered = render(report, args.format, color=use_color)
@@ -167,11 +194,29 @@ def _cmd_analyze(args: argparse.Namespace) -> int:
     else:
         print(rendered)
 
+    if report.baseline_suppressed and not args.quiet:
+        print(
+            f"contextlint: {report.baseline_suppressed} finding(s) suppressed by baseline.",
+            file=sys.stderr,
+        )
+
     if args.format == "badge" and not args.quiet:
         print("\nPaste into your README:\n" + badge_markdown(report), file=sys.stderr)
 
     if args.fail_on and report.has_at_least(Severity.from_str(args.fail_on)):
         return 1
+    return 0
+
+
+def _cmd_baseline(args: argparse.Namespace) -> int:
+    missing = [p for p in args.paths if not Path(p).exists()]
+    if missing:
+        print(f"contextlint: error: path not found: {', '.join(missing)}", file=sys.stderr)
+        return 2
+    config = Config.load(args.config) if args.config else Config.discover(args.paths[0])
+    report = analyze_paths(args.paths, config)
+    count = save_baseline(report, args.output)
+    print(f"contextlint: wrote baseline with {count} finding(s) to {args.output}")
     return 0
 
 
@@ -305,6 +350,8 @@ def main(argv: list[str] | None = None) -> int:
         return _cmd_analyze(args)
     if args.command == "compare":
         return _cmd_compare(args)
+    if args.command == "baseline":
+        return _cmd_baseline(args)
     if args.command == "rules":
         return _cmd_rules(args)
 

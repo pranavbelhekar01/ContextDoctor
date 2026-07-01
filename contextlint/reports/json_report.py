@@ -48,6 +48,7 @@ def report_to_dict(report: Report) -> dict:
             "total_chunks": report.total_chunks,
             "findings": len(report.findings),
             "by_severity": report.counts_by_severity(),
+            "baseline_suppressed": report.baseline_suppressed,
         },
         "metrics": report.metrics,
         "findings": [_finding_to_dict(f) for f in report.findings],

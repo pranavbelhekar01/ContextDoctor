@@ -50,6 +50,11 @@ jobs:
           contextlint analyze ./examples/messy_docs --format sarif -o results.sarif
           contextlint analyze ./examples/messy_docs --format html -o report.html
           contextlint analyze ./examples/risky_docs --format badge > /dev/null
+          contextlint analyze ./examples/mixed_formats --format json > /dev/null
+          contextlint analyze ./examples/pragma_demo
           contextlint compare ./examples/messy_docs ./examples/clean_docs --no-color
+          contextlint baseline ./examples/messy_docs -o /tmp/bl.json
+          contextlint analyze ./examples/messy_docs --baseline /tmp/bl.json
+          contextlint analyze ./examples/messy_docs --plugin examples/plugin/contextlint_placeholder_plugin.py > /dev/null
           contextlint analyze ./examples/clean_docs
         shell: bash

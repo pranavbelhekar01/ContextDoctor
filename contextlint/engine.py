@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import os
+import warnings
 from datetime import UTC, datetime
 from pathlib import Path
 
 from contextlint.analyzers import DEFAULT_ANALYZERS, AnalysisContext
+from contextlint.baseline import fingerprint
 from contextlint.config import Config
 from contextlint.models import Chunk, Document, Finding, Report, Severity
 from contextlint.parsers import discover_files, load_document
@@ -45,6 +47,33 @@ def _apply_rule_config(findings: list[Finding], config: Config) -> list[Finding]
     return kept
 
 
+def _apply_pragmas(findings: list[Finding], documents: list[Document]) -> list[Finding]:
+    """Drop findings silenced by inline ``contextlint: disable=`` pragmas.
+
+    Pragmas are file-scoped. A finding's locations in a file that disabled its
+    rule are removed; if that empties a location-bearing finding, it's dropped.
+    """
+    disabled_by_file = {doc.path: doc.disabled_rules for doc in documents if doc.disabled_rules}
+    if not disabled_by_file:
+        return findings
+
+    def is_disabled(file: str, rule_id: str) -> bool:
+        disabled = disabled_by_file.get(file)
+        return bool(disabled) and (rule_id in disabled or "*" in disabled)
+
+    kept: list[Finding] = []
+    for f in findings:
+        if not f.locations:
+            kept.append(f)
+            continue
+        remaining = [loc for loc in f.locations if not is_disabled(loc.file, f.rule_id)]
+        if not remaining:
+            continue  # every location was silenced
+        f.locations = remaining
+        kept.append(f)
+    return kept
+
+
 def _run_analyzers(ctx: AnalysisContext) -> tuple[list[Finding], dict, list]:
     analyzer_classes = list(DEFAULT_ANALYZERS) + load_plugins(ctx.config)
     results = [analyzer_cls().analyze(ctx) for analyzer_cls in analyzer_classes]
@@ -62,10 +91,19 @@ def _assemble(
     documents: list[Document],
     chunks: list[Chunk],
     config: Config,
+    baseline: set[str] | None = None,
 ) -> Report:
     ctx = AnalysisContext(documents=documents, chunks=chunks, config=config)
     findings, metrics, results = _run_analyzers(ctx)
+    findings = _apply_pragmas(findings, documents)
     findings = _apply_rule_config(findings, config)
+
+    suppressed = 0
+    if baseline:
+        before = len(findings)
+        findings = [f for f in findings if fingerprint(f) not in baseline]
+        suppressed = before - len(findings)
+
     health = compute_health(findings)
     return Report(
         root=root,
@@ -75,6 +113,7 @@ def _assemble(
         health_score=health.score,
         health_grade=health.grade,
         health_label=health.label,
+        baseline_suppressed=suppressed,
         findings=_sort_findings(findings),
         analyzers=results,
         metrics=metrics,
@@ -82,8 +121,17 @@ def _assemble(
     )
 
 
-def analyze_paths(paths: list[str | Path], config: Config | None = None) -> Report:
-    """Analyze one or more files/directories as a single merged corpus."""
+def analyze_paths(
+    paths: list[str | Path],
+    config: Config | None = None,
+    *,
+    baseline: set[str] | None = None,
+) -> Report:
+    """Analyze one or more files/directories as a single merged corpus.
+
+    Files that fail to load (e.g. a PDF without the optional backend) are
+    skipped with a warning rather than aborting the whole run.
+    """
     config = config or Config()
     documents: list[Document] = []
     all_chunks: list[Chunk] = []
@@ -93,24 +141,31 @@ def analyze_paths(paths: list[str | Path], config: Config | None = None) -> Repo
         root = p if p.is_dir() else p.parent
         for file in discover_files(p, config):
             display = _display_path(file, root)
-            doc = load_document(file, display, config, start_index=global_index)
+            try:
+                doc = load_document(file, display, config, start_index=global_index)
+            except Exception as exc:  # resilient discovery: skip unreadable files
+                warnings.warn(f"ContextLint: skipped '{display}': {exc}", stacklevel=2)
+                continue
             documents.append(doc)
             all_chunks.extend(doc.chunks)
             global_index += len(doc.chunks)
 
-    if len(paths) == 1:
-        root_label = str(Path(paths[0])).replace(os.sep, "/")
-    else:
-        root_label = f"{len(paths)} paths"
-    return _assemble(root=root_label, documents=documents, chunks=all_chunks, config=config)
+    root_label = (
+        str(Path(paths[0])).replace(os.sep, "/") if len(paths) == 1 else f"{len(paths)} paths"
+    )
+    return _assemble(
+        root=root_label, documents=documents, chunks=all_chunks, config=config, baseline=baseline
+    )
 
 
-def analyze_path(path: str | Path, config: Config | None = None) -> Report:
+def analyze_path(
+    path: str | Path, config: Config | None = None, *, baseline: set[str] | None = None
+) -> Report:
     """Analyze a single file or directory and return a :class:`Report`.
 
     Fully local and deterministic — no network, no API keys, no model files.
     """
-    return analyze_paths([path], config)
+    return analyze_paths([path], config, baseline=baseline)
 
 
 def analyze_chunks(

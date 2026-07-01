@@ -1,0 +1,3 @@
+{"id": "a", "text": "The retrieval service ranks candidate passages using a cross encoder and returns the top results to the caller."}
+{"id": "b", "content": "Embeddings are refreshed nightly by a batch job that reindexes any documents changed since the previous run."}
+{"id": "c", "text": "The retrieval service ranks candidate passages using a cross encoder and returns the top results to the caller."}

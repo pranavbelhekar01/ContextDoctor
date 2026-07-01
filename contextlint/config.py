@@ -53,7 +53,19 @@ class Config:
     plugins: tuple[str, ...] = ()
 
     # --- File discovery ---
-    extensions: tuple[str, ...] = (".md", ".markdown", ".txt", ".json")
+    extensions: tuple[str, ...] = (
+        ".md",
+        ".markdown",
+        ".txt",
+        ".json",
+        ".jsonl",
+        ".ndjson",
+        ".html",
+        ".htm",
+        ".csv",
+        ".tsv",
+        ".pdf",
+    )
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

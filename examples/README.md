@@ -9,6 +9,9 @@ fully offline.
 | [`messy_docs/`](messy_docs) | Oversized & tiny chunks, duplicate passages, a table split across a JSON chunk boundary, one giant heading section, and a chunk over the embedding token limit. | CTX001, CTX002, CTX003, CTX004, CTX005, CTX010 |
 | [`risky_docs/`](risky_docs) | A support log that leaked API keys, PII, and mojibake into the knowledge base. All detected values are redacted, never echoed. | CTX007, CTX008, CTX009 |
 | [`fragmented_kb/`](fragmented_kb) | A knowledge base where key systems are introduced at the top and only revisited at the very bottom, maximising fragmentation. Ships its own `.contextlint.json`. | CTX006 (experimental CFI) |
+| [`mixed_formats/`](mixed_formats) | The same corpus as HTML, CSV, and JSONL — shows the multi-format parsers. | CTX002, CTX003 |
+| [`pragma_demo/`](pragma_demo) | A doc that *shows* an example API key and opts out with an inline `contextlint: disable=CTX007` pragma. | _none_ (CTX007 suppressed) |
+| [`plugin/`](plugin) | A working custom-rule plugin (`PLH001`, unfinished content). | PLH001 (when loaded) |
 
 ## Try them
 

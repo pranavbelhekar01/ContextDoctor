@@ -30,6 +30,15 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   Plugin rules flow through the score, all reports, SARIF, and `--select`/`--ignore`.
   Loading is best-effort (a broken plugin warns and is skipped); built-in `CTX*`
   ids cannot be silently overridden. See `examples/plugin/`.
+- **More input formats**: HTML (`.html`/`.htm`, tags/scripts stripped), JSONL/NDJSON,
+  CSV/TSV (one chunk per row), and optional **PDF** (`pip install "contextlint[pdf]"`).
+  Unreadable files are skipped with a warning instead of aborting the run.
+- **Baseline files** — `contextlint baseline <path>` records current findings;
+  `analyze --baseline <file>` suppresses them so CI fails only on *new* issues.
+- **Inline disable pragmas** — file-scoped `<!-- contextlint: disable=CTX007 -->`
+  (and `disable-all`) to opt a document out of specific rules.
+- **Browser playground** (`playground/`) — the full analyzer running in WebAssembly
+  via Pyodide, plus a GitHub Pages deploy workflow. Nothing is uploaded.
 
 ## [0.1.0] — 2026-07-01
 
