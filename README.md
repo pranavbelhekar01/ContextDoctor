@@ -47,9 +47,7 @@ time, gate in CI, and show off:
 
 Drop a live badge in your README (`--format badge` prints the snippet):
 
-```markdown
 ![Context Health](https://img.shields.io/badge/context%20health-92%2F100%20A-brightgreen)
-```
 
 ---
 
