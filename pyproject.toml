@@ -9,7 +9,7 @@ description = "A static analyzer for RAG systems and context engineering workflo
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
-authors = [{ name = "ContextLint contributors" }]
+authors = [{ name = "Pranav Belhekar", email = "hello@lytyr.ai" }]
 keywords = ["rag", "llm", "context", "chunking", "static-analysis", "linter", "nlp", "retrieval"]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -26,9 +26,9 @@ classifiers = [
 dependencies = []
 
 [project.urls]
-Homepage = "https://github.com/contextlint/contextlint"
-Repository = "https://github.com/contextlint/contextlint"
-Issues = "https://github.com/contextlint/contextlint/issues"
+Homepage = "https://github.com/pranavbelhekar01/ContextLint"
+Repository = "https://github.com/pranavbelhekar01/ContextLint"
+Issues = "https://github.com/pranavbelhekar01/ContextLint/issues"
 
 [project.optional-dependencies]
 # Optional: parse binary PDFs. The core stays dependency-free without this.

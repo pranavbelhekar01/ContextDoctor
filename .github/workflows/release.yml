@@ -1,0 +1,70 @@
+name: Release
+
+# Build the package and publish to PyPI via OIDC Trusted Publishing (no secrets).
+#
+# - Push a tag like `v0.1.0`  -> builds and publishes to PyPI.
+# - Manual "Run workflow"     -> builds and publishes to TestPyPI (a safe dry-run).
+#
+# One-time setup on (Test)PyPI: add a "pending publisher" pointing at
+#   owner: pranavbelhekar01   repo: ContextLint
+#   workflow: release.yml     environment: pypi  (and testpypi)
+# See RELEASING.md for the full checklist.
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build sdist + wheel
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build
+        run: |
+          python -m pip install --upgrade build twine
+          python -m build
+          twine check dist/*
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  testpypi:
+    name: Publish to TestPyPI (dry-run)
+    needs: build
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    environment: testpypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+
+  pypi:
+    name: Publish to PyPI
+    needs: build
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1

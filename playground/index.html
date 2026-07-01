@@ -20,7 +20,11 @@
   header .tag { color:var(--muted); font-size:13px; }
   .privacy { margin-left:auto; color:var(--muted); font-size:12px; }
   main { display:grid; grid-template-columns:1fr 1fr; gap:0; min-height:calc(100vh - 62px); }
-  @media (max-width: 860px){ main { grid-template-columns:1fr; } }
+  @media (max-width: 860px){
+    main { grid-template-columns:1fr; }
+    .left { border-right:0; border-bottom:1px solid var(--border); }
+    #report { min-height:86vh; }   /* stop the report collapsing on narrow screens */
+  }
   .left { padding:18px 24px; border-right:1px solid var(--border); display:flex; flex-direction:column; }
   .right { padding:0; overflow:auto; background:#0b0d11; }
   .controls { display:flex; gap:10px; align-items:center; margin-bottom:12px; flex-wrap:wrap; }
@@ -64,7 +68,7 @@ Separate chunks with a blank line, or switch the Input dropdown to paste a JSON 
     <div class="hint">
       Tip: this is the same engine as the <code>contextlint</code> CLI. Install it with
       <code>pip install contextlint</code> to run it in CI. •
-      <a href="https://github.com/contextlint/contextlint" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://github.com/pranavbelhekar01/ContextLint" target="_blank" rel="noopener">GitHub</a>
     </div>
   </section>
 

@@ -17,7 +17,7 @@ _LEVEL = {
     Severity.INFO: "note",
 }
 
-_HELP_URI = "https://github.com/contextlint/contextlint#what-it-checks"
+_HELP_URI = "https://github.com/pranavbelhekar01/ContextLint#what-it-checks"
 
 
 def _rules_metadata() -> list[dict]:
@@ -73,7 +73,7 @@ def render_sarif(report: Report) -> str:
                 "tool": {
                     "driver": {
                         "name": "ContextLint",
-                        "informationUri": "https://github.com/contextlint/contextlint",
+                        "informationUri": "https://github.com/pranavbelhekar01/ContextLint",
                         "version": __version__,
                         "rules": _rules_metadata(),
                     }

@@ -4,9 +4,13 @@ All notable changes to ContextLint are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.1.0] — 2026-07-01
 
-### Added
+The first release: fully offline static analysis for RAG systems — zero API keys,
+zero cloud, zero runtime dependencies. Ten rules, a Context Health Score, six
+output formats, a plugin API, and a browser playground.
+
+### Added — analysis & scoring
 
 - **Context Health Score** — a single 0–100 score with an A–F grade in every
   report, plus a `badge` output format (shields.io endpoint JSON + Markdown snippet).
@@ -40,12 +44,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **Browser playground** (`playground/`) — the full analyzer running in WebAssembly
   via Pyodide, plus a GitHub Pages deploy workflow. Nothing is uploaded.
 
-## [0.1.0] — 2026-07-01
-
-Initial release. Fully offline static analysis for RAG systems — zero API keys,
-zero cloud, zero runtime dependencies.
-
-### Added
+### Added — core engine
 
 - `contextlint analyze <path>` CLI with terminal, JSON, and Markdown reports.
 - `contextlint rules` to list the rule catalogue.
